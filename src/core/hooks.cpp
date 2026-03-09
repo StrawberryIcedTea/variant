@@ -312,5 +312,4 @@ void H::Destroy()
     DTR::Present.Destroy();
     DTR::ResizeBuffers.Destroy();
     MH_Uninitialize();
-
 }

@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format-17 cppcheck
+
+      - name: clang-format check
+        run: |
+          find src/ -name '*.cpp' -o -name '*.h' | \
+            xargs clang-format-17 --style=file --dry-run --Werror
+
+      - name: cppcheck
+        run: |
+          cppcheck --enable=warning,style,performance --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --suppress=unknownMacro \
+            --suppress=preprocessorErrorDirective \
+            --suppress=returnDanglingLifetime \
+            --suppress=ignoredReturnValue \
+            --suppress=uselessCallsSubstr \
+            --suppress=constVariablePointer \
+            --suppress=toomanyconfigs \
+            --suppress='*:dependencies/*' \
+            -I src -I dependencies \
+            --std=c++23 \
+            src/
+
+  build:
+    name: Build
+    runs-on: windows-latest
+    needs: lint
+    strategy:
+      matrix:
+        config: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "17"
+
+      - name: Configure CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: clang-tidy
+        if: matrix.config == 'Debug'
+        run: |
+          clang-tidy --warnings-as-errors=* `
+            src/main.cpp `
+            src/core/interfaces.cpp `
+            src/core/hooks.cpp `
+            src/core/menu.cpp `
+            src/utilities/debug.cpp `
+            src/utilities/memory.cpp `
+            src/utilities/inputhook.cpp `
+            -- -std=c++23 -I src -I dependencies `
+            -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_DEBUG
+        shell: pwsh
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }} --parallel
+
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: variant-${{ matrix.config }}
+          path: build/${{ matrix.config }}/variant.dll

@@ -69,7 +69,6 @@ static DWORD WINAPI HookThread(LPVOID)
         return 1;
     }
 
-
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -108,5 +107,4 @@ void Input::Stop()
     CloseHandle(s_hThread);
     s_hThread = nullptr;
     s_threadId = 0;
-
 }
