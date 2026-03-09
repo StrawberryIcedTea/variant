@@ -1,0 +1,18 @@
+# Build artifacts
+build/
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.log
+*.txt
+!CMakeLists.txt
+
+# IDE
+.vs/
+.vscode/
+CMakeSettings.json
+
+# Local docs
+docs/
