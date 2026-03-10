@@ -52,7 +52,7 @@ jobs:
       - name: Install LLVM
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "17"
+          version: "19"
 
       - name: Configure CMake
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
@@ -61,6 +61,7 @@ jobs:
         if: matrix.config == 'Debug'
         run: |
           clang-tidy --warnings-as-errors=* `
+            -extra-arg=-Wno-microsoft-cast `
             src/main.cpp `
             src/core/interfaces.cpp `
             src/core/hooks.cpp `
@@ -69,7 +70,8 @@ jobs:
             src/utilities/memory.cpp `
             src/utilities/inputhook.cpp `
             -- -std=c++23 -I src -I dependencies `
-            -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_DEBUG
+            -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_DEBUG `
+            -fms-extensions -fms-compatibility
         shell: pwsh
 
       - name: Build

@@ -7,7 +7,7 @@
 <br/>
 
 ## About
-External game utility for Counter-Strike 2. Hooks into the D3D11 rendering pipeline to provide an interactive ImGui overlay and a complete input system built to work around Source 2's SDL3 layer.
+Internal game utility for CS2 (Counter-Strike 2). Hooks into the D3D11 rendering pipeline to provide an interactive ImGui overlay and a complete input system built to work around Source 2's SDL3 layer.
 
 <br/>
 
@@ -73,6 +73,38 @@ src/
     ├── hookmanager.h     MinHook wrapper
     └── inputhook.*       Low-level keyboard + mouse hooks
 ```
+
+<br/>
+<br/>
+
+## CI Pipeline
+
+All pushes and PRs to `main` run through a GitHub Actions pipeline:
+
+| Stage | Runner | Tool | Purpose |
+|-------|--------|------|---------|
+| Lint | Ubuntu | clang-format 17 | Enforces `.clang-format` style (Microsoft base, Allman braces) |
+| Lint | Ubuntu | cppcheck | Static analysis — warnings, style, performance |
+| Build | Windows | clang-tidy 19 | Semantic checks on Debug config |
+| Build | Windows | MSVC (VS 2022) | Compiles Debug + Release, uploads DLL artifacts |
+
+### Code style
+
+Formatting is enforced by clang-format using the project [`.clang-format`](.clang-format) config. Run it locally before pushing:
+
+```
+clang-format -i src/**/*.cpp src/**/*.h
+```
+
+### Local pipeline testing
+
+The lint job can be tested locally using [act](https://nektosact.com/) (requires Docker):
+
+```
+act -W .github/workflows/ci.yml -j lint --rm
+```
+
+The build job requires Windows + MSVC and can only run on GitHub's hosted runners.
 
 <br/>
 <br/>
