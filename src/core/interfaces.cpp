@@ -41,7 +41,7 @@ static bool GetD3D11VTables()
     ID3D11Device* pDev = nullptr;
     ID3D11DeviceContext* pCtx = nullptr;
 
-    D3D_FEATURE_LEVEL featureLevel;
+    D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
     HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0,
                                                D3D11_SDK_VERSION, &sd, &pSc, &pDev, &featureLevel, &pCtx);
 
