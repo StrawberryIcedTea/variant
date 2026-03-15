@@ -3,19 +3,20 @@
 #include "debug.h"
 #include <format>
 
-// Thin wrapper around MinHook for a single hook target.
+// MinHook detour wrapper for a single hook target.
 // Usage:
 //   HookManager hkPresent;
-//   hkPresent.pTarget = vtable[8];  // Present slot
-//   hkPresent.Create(&hkPresentDetour);
+//   hkPresent.Create(vtable[8], &hkPresentDetour);
 //   auto oPresent = hkPresent.Original<decltype(&hkPresentDetour)>();
 class HookManager
 {
   public:
-    void* pTarget = nullptr;
-
     HookManager() = default;
-    ~HookManager() { Destroy(); }
+
+    // Destructor intentionally does NOT call Remove().
+    // MinHook hooks must be removed explicitly before MH_Uninitialize(),
+    // and these inline globals outlive the MH_Uninitialize() call in H::Restore().
+    ~HookManager() = default;
 
     // Non-copyable, non-movable (MinHook hooks are not transferable)
     HookManager(const HookManager&) = delete;
@@ -23,43 +24,92 @@ class HookManager
     HookManager(HookManager&&) = delete;
     HookManager& operator=(HookManager&&) = delete;
 
-    bool Create(void* pDetour) noexcept
+    // Create and enable a hook in one call
+    bool Create(void* pFunction, void* pDetour)
     {
-        if (!pTarget || !pDetour)
+        if (!pFunction || !pDetour)
             return false;
 
-        MH_STATUS status = MH_CreateHook(pTarget, pDetour, &m_pOriginal);
+        m_pBase = pFunction;
+        m_pReplace = pDetour;
+
+        MH_STATUS status = MH_CreateHook(m_pBase, m_pReplace, &m_pOriginal);
         if (status != MH_OK)
         {
-            C::Print(std::format("[hook] MH_CreateHook failed: {}", MH_StatusToString(status)));
+            C::Print(std::format("[hook] MH_CreateHook failed: {} (base -> {:#x})", MH_StatusToString(status),
+                                 reinterpret_cast<uintptr_t>(m_pBase)));
             return false;
         }
 
-        status = MH_EnableHook(pTarget);
-        if (status != MH_OK)
+        if (!Replace())
         {
-            C::Print(std::format("[hook] MH_EnableHook failed: {}", MH_StatusToString(status)));
+            MH_RemoveHook(m_pBase);
+            m_pBase = nullptr;
+            m_pOriginal = nullptr;
+            m_pReplace = nullptr;
             return false;
         }
 
-        m_bActive = true;
         return true;
     }
 
-    void Destroy() noexcept
+    // Enable the hook (re-enable after Restore)
+    bool Replace()
     {
-        if (!m_bActive)
-            return;
+        if (!m_pBase || m_bHooked)
+            return false;
 
-        MH_DisableHook(pTarget);
-        MH_RemoveHook(pTarget);
-        m_bActive = false;
-        m_pOriginal = nullptr;
+        MH_STATUS status = MH_EnableHook(m_pBase);
+        if (status != MH_OK)
+        {
+            C::Print(std::format("[hook] MH_EnableHook failed: {} (base -> {:#x})", MH_StatusToString(status),
+                                 reinterpret_cast<uintptr_t>(m_pBase)));
+            return false;
+        }
+
+        m_bHooked = true;
+        return true;
     }
 
-    template <typename Fn> Fn Original() const noexcept { return reinterpret_cast<Fn>(m_pOriginal); }
+    // Disable the hook but keep it intact for re-enable via Replace()
+    bool Restore()
+    {
+        if (!m_bHooked)
+            return false;
+
+        MH_STATUS status = MH_DisableHook(m_pBase);
+        if (status != MH_OK)
+        {
+            C::Print(std::format("[hook] MH_DisableHook failed: {} (base -> {:#x})", MH_StatusToString(status),
+                                 reinterpret_cast<uintptr_t>(m_pBase)));
+            return false;
+        }
+
+        m_bHooked = false;
+        return true;
+    }
+
+    // Fully remove the hook (restore + remove from MinHook)
+    void Remove()
+    {
+        Restore();
+
+        if (m_pBase)
+        {
+            MH_RemoveHook(m_pBase);
+            m_pBase = nullptr;
+        }
+
+        m_pOriginal = nullptr;
+        m_pReplace = nullptr;
+    }
+
+    template <typename Fn> Fn Original() const { return reinterpret_cast<Fn>(m_pOriginal); }
+    bool IsHooked() const { return m_bHooked; }
 
   private:
-    void* m_pOriginal = nullptr;
-    bool m_bActive = false;
+    void* m_pBase = nullptr;     // original function address
+    void* m_pReplace = nullptr;  // our detour function
+    void* m_pOriginal = nullptr; // trampoline back to original
+    bool m_bHooked = false;
 };

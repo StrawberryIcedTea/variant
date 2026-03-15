@@ -14,8 +14,10 @@ add_library(variant SHARED)
 target_sources(variant PRIVATE
     src/main.cpp
     src/core/interfaces.cpp
-    src/core/hooks.cpp
-    src/core/menu.cpp
+    src/core/hooks/hooks.cpp
+    src/core/hooks/render/render.cpp
+    src/core/hooks/cursor/cursor.cpp
+    src/core/menu/menu.cpp
     src/utilities/debug.cpp
     src/utilities/memory.cpp
     src/utilities/inputhook.cpp

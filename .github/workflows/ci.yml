@@ -8,10 +8,10 @@ on:
 
 jobs:
   lint:
-    name: Lint & Static Analysis
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install tools
         run: |
@@ -39,46 +39,44 @@ jobs:
             --std=c++23 \
             src/
 
-  build:
-    name: Build
+  tidy:
+    name: Tidy
     runs-on: windows-latest
     needs: lint
-    strategy:
-      matrix:
-        config: [Debug, Release]
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install LLVM
-        uses: KyleMayes/install-llvm-action@v2
-        with:
-          version: "19"
-
-      - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+      - uses: actions/checkout@v5
 
       - name: clang-tidy
-        if: matrix.config == 'Debug'
         run: |
+          $files = Get-ChildItem -Path src -Recurse -Include *.cpp |
+                   Where-Object { $_.FullName -notlike '*dependencies*' } |
+                   ForEach-Object { $_.FullName }
           clang-tidy --warnings-as-errors=* `
             -extra-arg=-Wno-microsoft-cast `
-            src/main.cpp `
-            src/core/interfaces.cpp `
-            src/core/hooks.cpp `
-            src/core/menu.cpp `
-            src/utilities/debug.cpp `
-            src/utilities/memory.cpp `
-            src/utilities/inputhook.cpp `
+            @files `
             -- -std=c++23 -I src -I dependencies `
             -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_DEBUG `
             -fms-extensions -fms-compatibility
         shell: pwsh
 
+  build:
+    name: Build
+    runs-on: windows-latest
+    needs: [lint, tidy]
+    strategy:
+      matrix:
+        config: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Configure CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+
       - name: Build
         run: cmake --build build --config ${{ matrix.config }} --parallel
 
       - name: Upload DLL
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: variant-${{ matrix.config }}
           path: build/${{ matrix.config }}/variant.dll

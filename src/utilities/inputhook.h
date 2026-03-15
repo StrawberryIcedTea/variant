@@ -8,15 +8,16 @@
 // We use WH_KEYBOARD_LL + WH_MOUSE_LL on a dedicated thread with its own message pump.
 namespace Input
 {
-// Key states
-inline std::atomic<bool> bInsertPressed = false; // menu toggle
-inline std::atomic<bool> bSpaceHeld = false;     // reserved for features
+    // Key states
+    inline std::atomic<bool> bInsertPressed = false; // menu toggle
+    inline std::atomic<bool> bEndPressed = false;    // unload trigger
+    inline std::atomic<bool> bSpaceHeld = false;     // reserved for features
 
-// Mouse button states
-inline std::atomic<bool> bMouseLeft = false;
-inline std::atomic<bool> bMouseRight = false;
-inline std::atomic<bool> bMouseMiddle = false;
+    // Mouse button states
+    inline std::atomic<bool> bMouseLeft = false;
+    inline std::atomic<bool> bMouseRight = false;
+    inline std::atomic<bool> bMouseMiddle = false;
 
-void Start();
-void Stop();
+    void Start();
+    void Stop();
 }

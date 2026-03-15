@@ -6,11 +6,11 @@
 // Console output (debug builds)
 namespace C
 {
-inline FILE* fStream = nullptr;
-inline FILE* fLogFile = nullptr;
-inline bool bActive = false;
+    inline FILE* fStream = nullptr;
+    inline FILE* fLogFile = nullptr;
+    inline bool bActive = false;
 
-void SetupConsole(const char* title);
-void DestroyConsole();
-void Print(const std::string& msg);
+    void SetupConsole(const char* title);
+    void DestroyConsole();
+    void Print(const std::string& msg);
 }

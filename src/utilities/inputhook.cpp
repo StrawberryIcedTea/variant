@@ -16,6 +16,9 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         if (kb->vkCode == VK_INSERT && wParam == WM_KEYDOWN)
             Input::bInsertPressed.store(true);
 
+        if (kb->vkCode == VK_END && wParam == WM_KEYDOWN)
+            Input::bEndPressed.store(true);
+
         if (kb->vkCode == VK_SPACE)
         {
             if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
@@ -51,6 +54,8 @@ static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lPara
             break;
         case WM_MBUTTONUP:
             Input::bMouseMiddle.store(false);
+            break;
+        default:
             break;
         }
     }

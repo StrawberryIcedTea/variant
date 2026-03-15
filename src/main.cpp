@@ -12,15 +12,19 @@
 //         ░        ░  ░   ░      ░        ░  ░         ░
 //        ░
 
-#include "core/includes.h"
+#include "includes.h"
 #include "core/interfaces.h"
-#include "core/hooks.h"
+#include "core/hooks/hooks.h"
 #include "utilities/debug.h"
+#include "utilities/inputhook.h"
 
 DWORD WINAPI DllInitialization(LPVOID lpModule)
 {
     C::SetupConsole("variant debug");
     C::Print("[main] variant loaded");
+
+    // Start input hooks early so the unload key works during setup
+    Input::Start();
 
     // Wait for CS2 to finish loading
     while (!GetModuleHandleA("client.dll"))
@@ -30,6 +34,8 @@ DWORD WINAPI DllInitialization(LPVOID lpModule)
     if (!I::Setup())
     {
         C::Print("[main] FATAL: interface setup failed");
+        Input::Stop();
+        C::DestroyConsole();
         FreeLibraryAndExitThread(static_cast<HMODULE>(lpModule), 1);
         return 1;
     }
@@ -38,17 +44,24 @@ DWORD WINAPI DllInitialization(LPVOID lpModule)
     if (!H::Setup())
     {
         C::Print("[main] FATAL: hook setup failed");
+        H::Restore(); // Clean up any hooks that were partially created
+        C::DestroyConsole();
         FreeLibraryAndExitThread(static_cast<HMODULE>(lpModule), 1);
         return 1;
     }
     C::Print("[main] hooks OK - variant ready");
 
-    // Wait for unload key
-    while (!GetAsyncKeyState(VK_END))
+    // Wait for unload key (VK_END via low-level hook — GetAsyncKeyState broken by SDL3)
+    while (!Input::bEndPressed.load())
         Sleep(200);
 
     C::Print("[main] unloading...");
-    H::Destroy();
+    H::Restore();
+
+    // Grace period: let any in-flight Present/ResizeBuffers calls return
+    // before the DLL is unloaded from under them
+    Sleep(500);
+
     C::DestroyConsole();
     FreeLibraryAndExitThread(static_cast<HMODULE>(lpModule), 0);
     return 0;

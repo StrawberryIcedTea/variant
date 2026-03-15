@@ -1,0 +1,27 @@
+Checks: >
+  -*,
+  bugprone-*,
+  concurrency-*,
+  performance-*,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-pro-type-member-init,
+  misc-redundant-expression,
+  misc-unused-using-decls,
+  misc-static-assert,
+  modernize-use-nullptr,
+  modernize-use-auto,
+  modernize-use-using,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -performance-no-int-to-ptr
+
+# Treat warnings as non-fatal so tidy integrates smoothly into dev workflow
+WarningsAsErrors: ''
+
+HeaderFilterRegex: 'src/.*'
+
+CheckOptions:
+  - key: modernize-use-auto.MinTypeNameLength
+    value: 8
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: false
