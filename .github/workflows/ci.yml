@@ -46,10 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install LLVM
-        run: choco install llvm --version=19.1.7 -y --no-progress
-        shell: pwsh
-
       - name: clang-tidy
         run: |
           $files = Get-ChildItem -Path src -Recurse -Include *.cpp |
