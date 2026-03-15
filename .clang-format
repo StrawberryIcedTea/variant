@@ -38,4 +38,4 @@ ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 FixNamespaceComments: false
-NamespaceIndentation: None
+NamespaceIndentation: All
