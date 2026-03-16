@@ -14,6 +14,9 @@ namespace Render
     bool InitImGui(IDXGISwapChain* pSwapChain);
     void ShutdownImGui();
 
+    // Menu state + cursor transitions (called from hkPresent each frame)
+    void UpdateMenuState();
+
     // Hook handlers (wired into DTR:: by H::Setup)
     HRESULT WINAPI hkPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, UINT flags);
     HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain, UINT bufferCount, UINT width, UINT height,

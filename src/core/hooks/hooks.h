@@ -1,10 +1,8 @@
 #pragma once
 #include "../../includes.h"
 #include "../../utilities/hookmanager.h"
+#include "../interfaces.h"
 #include <dxgi.h>
-
-// Accessor for swap chain vtable (defined in interfaces.cpp)
-void** GetSwapChainVTable();
 
 // Virtual table indexes — single source of truth for all vtable offsets
 namespace VTABLE
@@ -27,6 +25,7 @@ namespace DTR
     inline HookManager ResizeBuffers;
     inline HookManager IsRelativeMouseMode;
     inline HookManager SDLSetRelMouseMode;
+    inline HookManager CreateMove;
 }
 
 namespace H

@@ -3,6 +3,7 @@
 
 #include "interfaces.h"
 #include "../utilities/debug.h"
+#include "../utilities/memory.h"
 #include <format>
 
 // Create a temporary D3D11 device + swapchain to grab the vtable pointers.
@@ -100,10 +101,47 @@ bool I::Setup()
     pInputSystem = CaptureInterface("inputsystem.dll", "InputSystemVersion001");
     // non-fatal: overlay works without cursor hooks
 
+    // GameResourceService - needed for entity access (bhop, ESP, etc.)
+    pGameResourceService = CaptureInterface("engine2.dll", "GameResourceServiceClientV001");
+    if (!pGameResourceService)
+    {
+        C::Print("[interfaces] FAILED: GameResourceServiceClientV001 not found");
+        return false;
+    }
+    C::Print(
+        std::format("[interfaces] IGameResourceService: {:#x}", reinterpret_cast<uintptr_t>(pGameResourceService)));
+
+    // CGameEntitySystem is at offset 0x58 from IGameResourceService
+    pEntitySystem = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(pGameResourceService) + 0x58);
+    if (!pEntitySystem)
+    {
+        C::Print("[interfaces] WARNING: CGameEntitySystem is null (may not be initialized yet)");
+    }
+    else
+    {
+        C::Print(std::format("[interfaces] CGameEntitySystem: {:#x}", reinterpret_cast<uintptr_t>(pEntitySystem)));
+    }
+
+    // CCSGOInput — resolve via pattern scan (dwCSGOInput offset is not a heap object in this build)
+    {
+        uintptr_t pCreateMove =
+            M::FindPattern("client.dll", "48 8B C4 4C 89 40 18 48 89 48 08 55 53 41 54 41 55 48 8D A8 F8 FE FF FF");
+
+        if (pCreateMove)
+        {
+            pCSGOInput = reinterpret_cast<void*>(pCreateMove);
+            C::Print(std::format("[interfaces] CreateMove found @ {:#x}", pCreateMove));
+        }
+        else
+        {
+            C::Print("[interfaces] WARNING: CreateMove pattern not found");
+        }
+    }
+
     return true;
 }
 
-void** GetSwapChainVTable()
+void** I::GetSwapChainVTable()
 {
     return s_swapChainVTable;
 }
