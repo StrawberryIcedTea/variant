@@ -1,8 +1,9 @@
 #include "memory.h"
-#include <Psapi.h>
-#pragma comment(lib, "psapi.lib")
 #include "debug.h"
+#include <Psapi.h>
 #include <format>
+
+#pragma comment(lib, "psapi.lib")
 
 static std::vector<int> PatternToBytes(const char* pattern)
 {

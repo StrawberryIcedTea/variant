@@ -12,6 +12,16 @@ namespace I
     inline ID3D11DeviceContext* pContext = nullptr;
     inline HWND hGameWindow = nullptr;
 
+    // Swap chain vtable — captured from dummy device during Setup
+    void** GetSwapChainVTable();
+
     // InputSystem - for cursor control (IsRelativeMouseMode vtable hook)
     inline void* pInputSystem = nullptr;
+
+    // Game entity access
+    inline void* pGameResourceService = nullptr; // IGameResourceService from engine2.dll
+    inline void* pEntitySystem = nullptr;        // CGameEntitySystem* (offset 0x58 from resource service)
+
+    // CreateMove function address — resolved via pattern scan in client.dll
+    inline void* pCSGOInput = nullptr;
 }

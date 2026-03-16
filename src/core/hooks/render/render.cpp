@@ -87,6 +87,92 @@ void Render::ShutdownImGui()
 // Hook handlers
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Menu state + cursor transitions — called from hkPresent each frame
+// ---------------------------------------------------------------------------
+
+void Render::UpdateMenuState()
+{
+    static bool s_bWasOpen = Menu::bOpen.load();
+    static POINT s_lastMenuCursor = {-1, -1};
+
+    if (Input::bInsertPressed.exchange(false))
+        Menu::bOpen.store(!Menu::bOpen.load());
+
+    const bool bOpenNow = Menu::bOpen.load();
+    const bool bJustOpened = bOpenNow && !s_bWasOpen;
+    const bool bJustClosed = !bOpenNow && s_bWasOpen;
+    const bool bRelative = Cursor::bGameRelativeMode.load();
+
+    if (bJustClosed && bRelative)
+        GetCursorPos(&s_lastMenuCursor);
+
+    // Handle cursor mode on open/close transitions
+    if (s_bWasOpen != bOpenNow)
+        Cursor::SetMenuMode(bOpenNow);
+    else if (bOpenNow)
+        Cursor::SuppressSDLRelativeMode();
+
+    // Restore the OS cursor shape after menu close (lobby) — our WM_SETCURSOR
+    // suppression left it NULL, and Windows won't refresh it until mouse moves.
+    if (bJustClosed && !bRelative && I::hGameWindow)
+        SendMessageA(I::hGameWindow, WM_SETCURSOR, (WPARAM)I::hGameWindow, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
+
+    // Match: restore last menu cursor (or center on first open)
+    if (bJustOpened && bRelative && I::hGameWindow)
+    {
+        POINT warp;
+        if (s_lastMenuCursor.x >= 0)
+        {
+            warp = s_lastMenuCursor;
+        }
+        else
+        {
+            RECT rc;
+            if (GetClientRect(I::hGameWindow, &rc))
+            {
+                warp = {(rc.right - rc.left) / 2, (rc.bottom - rc.top) / 2};
+                ClientToScreen(I::hGameWindow, &warp);
+            }
+            else
+                warp = {0, 0};
+        }
+        SetCursorPos(warp.x, warp.y);
+    }
+
+    // In a match use ImGui's software cursor so the OS cursor is never
+    // visible — eliminates any DWM-composited glide on close.
+    // In lobby the OS cursor is shared, so leave it as-is.
+    ImGui::GetIO().MouseDrawCursor = bOpenNow;
+
+    s_bWasOpen = bOpenNow;
+
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+
+    // On close: clear ImGui mouse position so the cursor doesn't flash at its last spot
+    if (bJustClosed)
+        ImGui::GetIO().AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+
+    // SDL3 steals all input — feed mouse state directly to ImGui
+    if (bOpenNow)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+
+        POINT pt;
+        if (GetCursorPos(&pt) && ScreenToClient(I::hGameWindow, &pt))
+            io.AddMousePosEvent(static_cast<float>(pt.x), static_cast<float>(pt.y));
+
+        io.AddMouseButtonEvent(0, Input::bMouseLeft.load());
+        io.AddMouseButtonEvent(1, Input::bMouseRight.load());
+        io.AddMouseButtonEvent(2, Input::bMouseMiddle.load());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Present hook
+// ---------------------------------------------------------------------------
+
 HRESULT WINAPI Render::hkPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, UINT flags)
 {
     auto oPresent = DTR::Present.Original<decltype(&hkPresent)>();
@@ -100,86 +186,7 @@ HRESULT WINAPI Render::hkPresent(IDXGISwapChain* pSwapChain, UINT syncInterval, 
 
     if (bInit)
     {
-        static bool s_bWasOpen = Menu::bOpen.load();
-        static POINT s_lastMenuCursor = {-1, -1};
-
-        if (Input::bInsertPressed.exchange(false))
-            Menu::bOpen = !Menu::bOpen.load();
-
-        const bool bOpenNow = Menu::bOpen.load();
-        const bool bJustOpened = bOpenNow && !s_bWasOpen;
-        const bool bJustClosed = !bOpenNow && s_bWasOpen;
-        const bool bRelative = Cursor::bGameRelativeMode.load();
-
-        if (bJustClosed && bRelative)
-            GetCursorPos(&s_lastMenuCursor);
-
-        // Handle cursor mode on open/close transitions
-        if (s_bWasOpen != bOpenNow)
-            Cursor::SetMenuMode(bOpenNow);
-        else if (bOpenNow)
-            Cursor::SuppressSDLRelativeMode();
-
-        // Restore the OS cursor shape after menu close (lobby) — our WM_SETCURSOR
-        // suppression left it NULL, and Windows won't refresh it until mouse moves.
-        if (bJustClosed && !bRelative && I::hGameWindow)
-            SendMessageA(I::hGameWindow, WM_SETCURSOR, (WPARAM)I::hGameWindow, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
-
-        if (bJustOpened && bRelative && I::hGameWindow)
-        {
-            // Match: restore last menu cursor (or center on first open)
-            POINT warp;
-            if (s_lastMenuCursor.x >= 0)
-            {
-                warp = s_lastMenuCursor;
-            }
-            else
-            {
-                RECT rc;
-                if (GetClientRect(I::hGameWindow, &rc))
-                {
-                    warp = {(rc.right - rc.left) / 2, (rc.bottom - rc.top) / 2};
-                    ClientToScreen(I::hGameWindow, &warp);
-                }
-                else
-                    warp = {0, 0};
-            }
-            SetCursorPos(warp.x, warp.y);
-        }
-
-        // In a match use ImGui's software cursor so the OS cursor is never
-        // visible — eliminates any DWM-composited glide on close.
-        // In lobby the OS cursor is shared, so leave it as-is.
-        {
-            ImGuiIO& io = ImGui::GetIO();
-            io.MouseDrawCursor = bOpenNow;
-        }
-
-        s_bWasOpen = bOpenNow;
-
-        ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-
-        // On close: clear ImGui mouse position so the cursor doesn't flash at its last spot
-        if (bJustClosed)
-        {
-            ImGuiIO& io = ImGui::GetIO();
-            io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
-        }
-
-        // SDL3 steals all input — feed mouse state directly to ImGui
-        if (bOpenNow)
-        {
-            ImGuiIO& io = ImGui::GetIO();
-
-            POINT pt;
-            if (GetCursorPos(&pt) && ScreenToClient(I::hGameWindow, &pt))
-                io.AddMousePosEvent(static_cast<float>(pt.x), static_cast<float>(pt.y));
-
-            io.AddMouseButtonEvent(0, Input::bMouseLeft.load());
-            io.AddMouseButtonEvent(1, Input::bMouseRight.load());
-            io.AddMouseButtonEvent(2, Input::bMouseMiddle.load());
-        }
+        UpdateMenuState();
 
         ImGui::NewFrame();
         Menu::Render();

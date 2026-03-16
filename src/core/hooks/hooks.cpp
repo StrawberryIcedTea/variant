@@ -1,9 +1,9 @@
 // Hook orchestrator — Setup/Restore
 
 #include "hooks.h"
-#include "../interfaces.h"
 #include "render/render.h"
 #include "cursor/cursor.h"
+#include "createmove/createmove.h"
 #include "../../utilities/debug.h"
 #include "../../utilities/memory.h"
 #include "../../utilities/inputhook.h"
@@ -20,7 +20,7 @@ bool H::Setup()
         return false;
     }
 
-    auto** vtable = GetSwapChainVTable();
+    auto** vtable = I::GetSwapChainVTable();
     if (!vtable)
     {
         C::Print("[hooks] swap chain vtable is null");
@@ -54,6 +54,19 @@ bool H::Setup()
         }
     }
 
+    // CreateMove — function address resolved in I::Setup via pattern scan
+    if (I::pCSGOInput)
+    {
+        if (!DTR::CreateMove.Create(I::pCSGOInput, reinterpret_cast<void*>(&CreateMove::hkCreateMove)))
+            C::Print("[hooks] failed to hook CreateMove (non-fatal)");
+        else
+            C::Print("[hooks] CreateMove hooked");
+    }
+    else
+    {
+        C::Print("[hooks] CreateMove not found — game features disabled");
+    }
+
     return true;
 }
 
@@ -67,6 +80,7 @@ void H::Restore()
 
     Render::ReleaseRenderTarget();
 
+    DTR::CreateMove.Remove();
     DTR::SDLSetRelMouseMode.Remove();
     DTR::IsRelativeMouseMode.Remove();
     DTR::Present.Remove();
