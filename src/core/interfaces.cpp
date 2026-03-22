@@ -127,7 +127,7 @@ bool I::Setup()
 
     // CCSGOInput — inline global in client.dll at dwCSGOInput offset
     {
-        uintptr_t clientBase = reinterpret_cast<uintptr_t>(GetModuleHandleA("client.dll"));
+        auto clientBase = reinterpret_cast<uintptr_t>(GetModuleHandleA("client.dll"));
         pCSGOInput = reinterpret_cast<void*>(clientBase + Offsets::dwCSGOInput);
         C::Print(std::format("[interfaces] CCSGOInput @ {:#x} (client+{:#x})", reinterpret_cast<uintptr_t>(pCSGOInput),
                              Offsets::dwCSGOInput));

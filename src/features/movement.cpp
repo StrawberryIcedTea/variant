@@ -22,7 +22,7 @@ void Movement::BunnyHop(CUserCmd* pCmd, const C_BaseEntity* pLocal)
     if (!(pLocal->m_fFlags & FL_ONGROUND))
         return;
 
-    constexpr uint64_t jump = static_cast<uint64_t>(IN_JUMP);
+    constexpr auto jump = static_cast<uint64_t>(IN_JUMP);
 
     // Clear jump to force a release — engine re-sets from space next frame
     pCmd->nButtons.nValue &= ~jump;
