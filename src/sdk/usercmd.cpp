@@ -11,7 +11,7 @@ static struct
     struct
     {
         int allocatedSize;
-        int _pad; // cppcheck-suppress unusedStructMember
+        MEM_PAD(0x04);
         void* elements[2];
     } rep;
     RepeatedPtrField saved;
