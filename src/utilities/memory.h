@@ -10,11 +10,7 @@
 // -----------------------------------------------------------------------
 #define MEM_PAD_CONCAT_INNER(a, b) a##b
 #define MEM_PAD_CONCAT(a, b) MEM_PAD_CONCAT_INNER(a, b)
-#define MEM_PAD(SIZE)                                                                                                  \
-  private:                                                                                                             \
-    char MEM_PAD_CONCAT(_pad_, __COUNTER__)[SIZE];                                                                     \
-                                                                                                                       \
-  public:
+#define MEM_PAD(SIZE) char MEM_PAD_CONCAT(_pad_, __COUNTER__)[SIZE];
 
 // -----------------------------------------------------------------------
 // Memory utilities: pattern scanning, vtable access
