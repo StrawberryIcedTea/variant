@@ -41,6 +41,7 @@ static_assert(sizeof(RepeatedPtrField) == 0x18);
 
 // CBasePB — protobuf base class (0x10 bytes)
 // All protobuf message types (CSubtickMoveStep, CBaseUserCmdPB, CInButtonStatePB) inherit this
+// cppcheck-suppress noConstructor
 struct CBasePB
 {
     MEM_PAD(0x08);        // +0x00: vtable
@@ -52,6 +53,7 @@ static_assert(offsetof(CBasePB, nHasBits) == 0x08);
 
 // CInButtonState (0x20 bytes, inline in CUserCmd at +0x58 and CCSGOInput at +0x248)
 // NOT a protobuf type — simple struct with vtable
+// cppcheck-suppress noConstructor
 struct CInButtonState
 {
     MEM_PAD(0x08);     // +0x00: vtable
@@ -64,6 +66,7 @@ static_assert(offsetof(CInButtonState, nValue) == 0x08);
 
 // CSubtickMoveStep : CBasePB (0x20 bytes, March 2026)
 // Fields shifted -8 from asphyxia Nov 2024 layout
+// cppcheck-suppress noConstructor
 struct CSubtickMoveStep : CBasePB
 {
     uint64_t nButton; // +0x10 — button enum (IN_JUMP etc)
@@ -78,6 +81,7 @@ static_assert(offsetof(CSubtickMoveStep, flWhen) == 0x1C);
 
 // CBaseUserCmdPB : CBasePB (protobuf, March 2026)
 // Layout matches asphyxia Nov 2024 through +0x40, but flForwardMove shifted +8
+// cppcheck-suppress noConstructor
 struct CBaseUserCmdPB : CBasePB
 {
     MEM_PAD(0x08);                 // +0x10: unknown field
@@ -94,6 +98,7 @@ static_assert(offsetof(CBaseUserCmdPB, pInButtonStatePB) == 0x38);
 static_assert(offsetof(CBaseUserCmdPB, flForwardMove) == 0x58);
 
 // CUserCmd (0x98 bytes)
+// cppcheck-suppress noConstructor
 struct CUserCmd
 {
     MEM_PAD(0x08);            // +0x00: vtable

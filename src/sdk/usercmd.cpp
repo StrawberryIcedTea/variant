@@ -11,7 +11,7 @@ static struct
     struct
     {
         int allocatedSize;
-        int _pad;
+        int _pad; // NOLINT — engine Rep_t alignment
         void* elements[2];
     } rep;
     RepeatedPtrField saved;

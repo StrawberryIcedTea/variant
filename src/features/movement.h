@@ -10,5 +10,5 @@ struct C_BaseEntity;
 namespace Movement
 {
     // Called from vtable[22] — clears jump on ground + optional subtick entries
-    void BunnyHop(CUserCmd* pCmd, C_BaseEntity* pLocal);
+    void BunnyHop(CUserCmd* pCmd, const C_BaseEntity* pLocal);
 }

@@ -53,6 +53,7 @@ enum ECommandButtons : uint64_t
 // -----------------------------------------------------------------------
 // C_BaseEntity — partial struct (cs2-dumper offsets, March 2026)
 // -----------------------------------------------------------------------
+// cppcheck-suppress noConstructor
 struct C_BaseEntity
 {
     MEM_PAD(0x354);        // +0x000

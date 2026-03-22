@@ -7,7 +7,7 @@
 #include "../core/variables.h"
 #include "../utilities/inputhook.h"
 
-void Movement::BunnyHop(CUserCmd* pCmd, C_BaseEntity* pLocal)
+void Movement::BunnyHop(CUserCmd* pCmd, const C_BaseEntity* pLocal)
 {
     if (Vars.nBhopMode == Variables_t::BHOP_DISABLED || !pCmd)
         return;
