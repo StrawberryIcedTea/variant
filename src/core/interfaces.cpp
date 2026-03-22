@@ -2,6 +2,8 @@
 // D3D11 device/swapchain via dummy window + Source 2 CreateInterface
 
 #include "interfaces.h"
+#include "../sdk/entitysystem.h"
+#include "../sdk/usercmd.h"
 #include "../utilities/debug.h"
 #include "../utilities/memory.h"
 #include <format>
@@ -111,8 +113,9 @@ bool I::Setup()
     C::Print(
         std::format("[interfaces] IGameResourceService: {:#x}", reinterpret_cast<uintptr_t>(pGameResourceService)));
 
-    // CGameEntitySystem is at offset 0x58 from IGameResourceService
-    pEntitySystem = *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(pGameResourceService) + 0x58);
+    // CGameEntitySystem at IGameResourceService+0x58
+    pEntitySystem =
+        *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(pGameResourceService) + Offsets::pEntitySystem);
     if (!pEntitySystem)
     {
         C::Print("[interfaces] WARNING: CGameEntitySystem is null (may not be initialized yet)");
@@ -122,19 +125,30 @@ bool I::Setup()
         C::Print(std::format("[interfaces] CGameEntitySystem: {:#x}", reinterpret_cast<uintptr_t>(pEntitySystem)));
     }
 
-    // CCSGOInput — resolve via pattern scan (dwCSGOInput offset is not a heap object in this build)
+    // CCSGOInput — inline global in client.dll at dwCSGOInput offset
     {
-        uintptr_t pCreateMove =
-            M::FindPattern("client.dll", "48 8B C4 4C 89 40 18 48 89 48 08 55 53 41 54 41 55 48 8D A8 F8 FE FF FF");
+        uintptr_t clientBase = reinterpret_cast<uintptr_t>(GetModuleHandleA("client.dll"));
+        pCSGOInput = reinterpret_cast<void*>(clientBase + Offsets::dwCSGOInput);
+        C::Print(std::format("[interfaces] CCSGOInput @ {:#x} (client+{:#x})", reinterpret_cast<uintptr_t>(pCSGOInput),
+                             Offsets::dwCSGOInput));
+    }
 
-        if (pCreateMove)
+    // Subtick: resolve fnCreateElement + fnAddToField from inlined add_subtick_moves code
+    // Pattern: E8 [createElement] 48 8B D0 48 8D 4F 18 E8 [addToField] 48 8B D0
+    // These are called by the engine's own subtick creation logic (inlined, not a standalone fn)
+    {
+        uintptr_t addr = M::FindPattern("client.dll", "E8 ? ? ? ? 48 8B D0 48 8D 4F 18 E8 ? ? ? ? 48 8B D0");
+        if (addr)
         {
-            pCSGOInput = reinterpret_cast<void*>(pCreateMove);
-            C::Print(std::format("[interfaces] CreateMove found @ {:#x}", pCreateMove));
+            Subtick::fnCreateElement = reinterpret_cast<Subtick::CreateElementFn>(M::ResolveRelative(addr, 1, 5));
+            Subtick::fnAddToField = reinterpret_cast<Subtick::AddToFieldFn>(M::ResolveRelative(addr + 12, 1, 5));
+            C::Print(std::format("[interfaces] subtick: createElement={:#x} addToField={:#x}",
+                                 reinterpret_cast<uintptr_t>(Subtick::fnCreateElement),
+                                 reinterpret_cast<uintptr_t>(Subtick::fnAddToField)));
         }
         else
         {
-            C::Print("[interfaces] WARNING: CreateMove pattern not found");
+            C::Print("[interfaces] subtick pattern not found (subtick disabled)");
         }
     }
 

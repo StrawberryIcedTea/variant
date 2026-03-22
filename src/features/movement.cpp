@@ -1,61 +1,33 @@
-// Movement features — bunny hop
-// Wired into CreateMove via createmove.cpp
-//
-// Uses ForceJump state machine (adapted from saura07) for reliable bhop.
-// Queries EntitySystem for player state — no raw offsets in feature code.
+// Movement features — bunny hop via direct button manipulation
+// Called from vtable[22]: clears jump on ground, optionally injects subtick entries
 
 #include "movement.h"
 #include "../sdk/entitysystem.h"
+#include "../sdk/usercmd.h"
 #include "../core/variables.h"
 #include "../utilities/inputhook.h"
 
-void Movement::BunnyHop()
+void Movement::BunnyHop(CUserCmd* pCmd, C_BaseEntity* pLocal)
 {
-    if (!Vars.bBunnyHop)
+    if (Vars.nBhopMode == Variables_t::BHOP_DISABLED || !pCmd)
         return;
 
-    if (!EntitySystem::InitForceJump())
+    if (!Input::bSpaceHeld.load(std::memory_order_relaxed))
         return;
 
-    bool bSpaceHeld = Input::bSpaceHeld.load(std::memory_order_relaxed);
-
-    // State machine (adapted from saura07 CS:GO bhop)
-    // bLastJumped: we forced jump last tick while on ground
-    // bShouldFake: try forcing jump again to catch narrow landing windows
-    static bool bLastJumped = false, bShouldFake = false;
-
-    if (!bSpaceHeld)
-    {
-        bLastJumped = false;
-        bShouldFake = false;
-        return;
-    }
-
-    void* pPawn = EntitySystem::GetLocalPlayerPawn();
-    if (!pPawn)
+    if (pLocal->m_MoveType == MOVETYPE_LADDER || pLocal->m_MoveType == MOVETYPE_NOCLIP ||
+        pLocal->m_MoveType == MOVETYPE_OBSERVER)
         return;
 
-    uint8_t moveType = GetField<uint8_t>(pPawn, Offsets::m_MoveType);
-    if (moveType == MOVETYPE_LADDER || moveType == MOVETYPE_NOCLIP || moveType == MOVETYPE_OBSERVER ||
-        moveType == MOVETYPE_FLY)
+    if (!(pLocal->m_fFlags & FL_ONGROUND))
         return;
 
-    bool bOnGround = (GetField<uint32_t>(pPawn, Offsets::m_fFlags) & FL_ONGROUND) != 0;
+    constexpr uint64_t jump = static_cast<uint64_t>(IN_JUMP);
 
-    if (!bLastJumped && bShouldFake)
-    {
-        bShouldFake = false;
-        EntitySystem::SetForceJump(true);
-    }
-    else if (bOnGround)
-    {
-        bLastJumped = true;
-        bShouldFake = true;
-        EntitySystem::SetForceJump(true);
-    }
-    else
-    {
-        EntitySystem::SetForceJump(false);
-        bLastJumped = false;
-    }
+    // Clear jump to force a release — engine re-sets from space next frame
+    pCmd->nButtons.nValue &= ~jump;
+
+    // Subtick: inject press/release entries for timing
+    if (Vars.nBhopMode == Variables_t::BHOP_SUBTICK && Subtick::fnCreateElement && IsValidPtr(pCmd->pBaseCmd))
+        Subtick::Inject(pCmd->pBaseCmd, jump);
 }

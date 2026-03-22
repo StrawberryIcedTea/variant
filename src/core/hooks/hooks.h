@@ -4,7 +4,6 @@
 #include "../interfaces.h"
 #include <dxgi.h>
 
-// Virtual table indexes — single source of truth for all vtable offsets
 namespace VTABLE
 {
     enum
@@ -14,11 +13,14 @@ namespace VTABLE
         RESIZEBUFFERS = 13,
 
         /* InputSystem */
-        ISRELATIVEMOUSEMODE = 76
+        ISRELATIVEMOUSEMODE = 76,
+
+        /* CCSGOInput */
+        CREATEMOVE = 5,
+        CREATEMOVE_INNER = 22
     };
 }
 
-// Detour instances - one HookManager per hooked function
 namespace DTR
 {
     inline HookManager Present;
@@ -26,6 +28,7 @@ namespace DTR
     inline HookManager IsRelativeMouseMode;
     inline HookManager SDLSetRelMouseMode;
     inline HookManager CreateMove;
+    inline HookManager CreateMoveInner;
 }
 
 namespace H
@@ -33,6 +36,5 @@ namespace H
     bool Setup();
     void Restore();
 
-    // Original WndProc (subclassed, not detoured) — stored here because Restore() unsubclasses
     inline WNDPROC oWndProc = nullptr;
 }
