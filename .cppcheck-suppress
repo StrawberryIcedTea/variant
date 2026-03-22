@@ -1,0 +1,6 @@
+// SDK overlay structs — game memory layouts, never constructed by us
+noConstructor:src/sdk/entitysystem.h
+noConstructor:src/sdk/usercmd.h
+
+// Engine Rep_t alignment padding
+unusedStructMember:src/sdk/usercmd.cpp

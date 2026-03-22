@@ -7,7 +7,13 @@ struct Variables_t
     bool bESP = false;
 
     // Misc
-    bool bBunnyHop = false;
+    enum BhopMode : int
+    {
+        BHOP_DISABLED = 0,
+        BHOP_NORMAL,
+        BHOP_SUBTICK
+    };
+    int nBhopMode = BHOP_DISABLED;
 };
 
 inline Variables_t Vars;

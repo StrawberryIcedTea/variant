@@ -22,6 +22,6 @@ namespace I
     inline void* pGameResourceService = nullptr; // IGameResourceService from engine2.dll
     inline void* pEntitySystem = nullptr;        // CGameEntitySystem* (offset 0x58 from resource service)
 
-    // CreateMove function address — resolved via pattern scan in client.dll
+    // CCSGOInput object pointer — resolved via dwCSGOInput offset, used for vtable[5] hooking
     inline void* pCSGOInput = nullptr;
 }

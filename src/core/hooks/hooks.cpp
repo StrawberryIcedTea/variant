@@ -8,10 +8,6 @@
 #include "../../utilities/memory.h"
 #include "../../utilities/inputhook.h"
 
-// ---------------------------------------------------------------------------
-// Setup / Restore
-// ---------------------------------------------------------------------------
-
 bool H::Setup()
 {
     if (MH_Initialize() != MH_OK)
@@ -27,14 +23,11 @@ bool H::Setup()
         return false;
     }
 
-    // D3D11 hooks
     if (!DTR::Present.Create(vtable[VTABLE::PRESENT], &Render::hkPresent))
         return false;
-
     if (!DTR::ResizeBuffers.Create(vtable[VTABLE::RESIZEBUFFERS], &Render::hkResizeBuffers))
         return false;
 
-    // Cursor control: InputSystem vtable + SDL3
     if (I::pInputSystem)
     {
         if (!DTR::IsRelativeMouseMode.Create(M::GetVFunc(I::pInputSystem, VTABLE::ISRELATIVEMOUSEMODE),
@@ -54,17 +47,16 @@ bool H::Setup()
         }
     }
 
-    // CreateMove — function address resolved in I::Setup via pattern scan
+    // CCSGOInput vtable hooks
     if (I::pCSGOInput)
     {
-        if (!DTR::CreateMove.Create(I::pCSGOInput, reinterpret_cast<void*>(&CreateMove::hkCreateMove)))
+        if (!DTR::CreateMove.Create(M::GetVFunc(I::pCSGOInput, VTABLE::CREATEMOVE),
+                                    reinterpret_cast<void*>(&CreateMove::hkCreateMove)))
             C::Print("[hooks] failed to hook CreateMove (non-fatal)");
-        else
-            C::Print("[hooks] CreateMove hooked");
-    }
-    else
-    {
-        C::Print("[hooks] CreateMove not found — game features disabled");
+
+        if (!DTR::CreateMoveInner.Create(M::GetVFunc(I::pCSGOInput, VTABLE::CREATEMOVE_INNER),
+                                         reinterpret_cast<void*>(&CreateMove::hkCreateMoveInner)))
+            C::Print("[hooks] failed to hook CreateMoveInner (non-fatal)");
     }
 
     return true;
@@ -80,13 +72,13 @@ void H::Restore()
 
     Render::ReleaseRenderTarget();
 
+    DTR::CreateMoveInner.Remove();
     DTR::CreateMove.Remove();
     DTR::SDLSetRelMouseMode.Remove();
     DTR::IsRelativeMouseMode.Remove();
     DTR::Present.Remove();
     DTR::ResizeBuffers.Remove();
 
-    // Release COM refs acquired in InitImGui (GetDevice/GetImmediateContext AddRef)
     if (I::pContext)
     {
         I::pContext->Release();

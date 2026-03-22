@@ -23,7 +23,8 @@ void Menu::Render()
 
         if (ImGui::CollapsingHeader("Misc"))
         {
-            ImGui::Checkbox("Bunny Hop", &Vars.bBunnyHop);
+            static const char* bhopModes[] = {"Disabled", "Normal", "Subtick"};
+            ImGui::Combo("Bunny Hop", &Vars.nBhopMode, bhopModes, IM_ARRAYSIZE(bhopModes));
         }
 
         ImGui::Separator();

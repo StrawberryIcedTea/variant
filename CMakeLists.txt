@@ -15,6 +15,7 @@ target_sources(variant PRIVATE
     src/main.cpp
     src/core/interfaces.cpp
     src/sdk/entitysystem.cpp
+    src/sdk/usercmd.cpp
     src/core/hooks/hooks.cpp
     src/core/hooks/render/render.cpp
     src/core/hooks/cursor/cursor.cpp

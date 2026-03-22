@@ -13,7 +13,8 @@ Checks: >
   modernize-use-using,
   -bugprone-easily-swappable-parameters,
   -bugprone-narrowing-conversions,
-  -performance-no-int-to-ptr
+  -performance-no-int-to-ptr,
+  -clang-diagnostic-invalid-offsetof
 
 # Treat warnings as non-fatal so tidy integrates smoothly into dev workflow
 WarningsAsErrors: ''
