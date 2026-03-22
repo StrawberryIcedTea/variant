@@ -10,8 +10,7 @@ static struct
     CSubtickMoveStep* step1;
     struct
     {
-        int allocatedSize;
-        MEM_PAD(0x04);
+        uint64_t allocatedSize;
         void* elements[2];
     } rep;
     RepeatedPtrField saved;
