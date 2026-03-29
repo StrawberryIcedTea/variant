@@ -85,7 +85,7 @@ bool Movement::EdgeBug(CUserCmd* pCmd, C_BaseEntity* pLocal)
     };
 
     bool edgeFound = false;
-    for (auto& off : offsets)
+    for (const auto& off : offsets)
     {
         if (TraceDownFrom(ox + off[0] * edgeX, oy + off[1] * edgeY, oz, 8.f) < 1.f)
         {

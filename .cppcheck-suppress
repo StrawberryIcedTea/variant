@@ -1,6 +1,10 @@
 // SDK overlay structs — game memory layouts, never constructed by us
-noConstructor:src/sdk/entitysystem.h
-noConstructor:src/sdk/usercmd.h
+noConstructor:src/sdk/entity.h
 
-// Engine Rep_t alignment padding
-unusedStructMember:src/features/movement.cpp
+// Schema field accessors reinterpret_cast uint8_t* → T* intentionally:
+// the pointer arithmetic lands on real game memory of that type.
+invalidPointerCast:src/sdk/entity.h
+
+// useStlAlgorithm — raw loop is clearer here with early-exit + side effect
+useStlAlgorithm:src/core/schema.cpp
+useStlAlgorithm:src/features/movement/edgebug/edgebug.cpp
