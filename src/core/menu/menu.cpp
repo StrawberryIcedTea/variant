@@ -23,8 +23,11 @@ void Menu::Render()
 
         if (ImGui::CollapsingHeader("Misc"))
         {
-            static const char* bhopModes[] = {"Disabled", "Normal", "Subtick"};
-            ImGui::Combo("Bunny Hop", &Vars.nBhopMode, bhopModes, IM_ARRAYSIZE(bhopModes));
+            static const char* modes[] = {"Disabled", "Normal", "Subtick"};
+            ImGui::Combo("Bunny Hop", &Vars.nBhopMode, modes, IM_ARRAYSIZE(modes));
+            ImGui::Combo("Auto Strafe", &Vars.nAutoStrafeMode, modes, IM_ARRAYSIZE(modes));
+            ImGui::Checkbox("Jump Bug", &Vars.bJumpBug);
+            ImGui::Checkbox("Edge Bug", &Vars.bEdgeBug);
         }
 
         ImGui::Separator();

@@ -1,6 +1,5 @@
 #pragma once
 #include "../../../includes.h"
-#include <dxgi.h>
 #include <atomic>
 
 // D3D11 render target + ImGui lifecycle + Present/ResizeBuffers hook handlers

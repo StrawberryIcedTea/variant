@@ -14,6 +14,17 @@ struct Variables_t
         BHOP_SUBTICK
     };
     int nBhopMode = BHOP_DISABLED;
+
+    enum AutoStrafeMode : int
+    {
+        STRAFE_DISABLED = 0,
+        STRAFE_NORMAL,
+        STRAFE_SUBTICK
+    };
+    int nAutoStrafeMode = STRAFE_DISABLED;
+
+    bool bJumpBug = false;
+    bool bEdgeBug = false;
 };
 
 inline Variables_t Vars;
