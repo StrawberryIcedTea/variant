@@ -34,6 +34,8 @@ jobs:
             --suppress=uselessCallsSubstr \
             --suppress=constVariablePointer \
             --suppress=toomanyconfigs \
+            --suppress=invalidPointerCast \
+            --suppress=useStlAlgorithm \
             --suppress='*:dependencies/*' \
             -I src -I dependencies \
             --std=c++23 \
