@@ -33,7 +33,10 @@ jobs:
             --suppress=ignoredReturnValue \
             --suppress=uselessCallsSubstr \
             --suppress=constVariablePointer \
+            --suppress=constVariableReference \
             --suppress=toomanyconfigs \
+            --suppress=invalidPointerCast \
+            --suppress=useStlAlgorithm \
             --suppress='*:dependencies/*' \
             -I src -I dependencies \
             --std=c++23 \

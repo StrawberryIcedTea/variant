@@ -25,13 +25,13 @@ class HookManager
     HookManager& operator=(HookManager&&) = delete;
 
     // Create and enable a hook in one call
-    bool Create(void* pFunction, void* pDetour)
+    template <typename Fn> bool Create(void* pFunction, Fn pDetour)
     {
         if (!pFunction || !pDetour)
             return false;
 
         m_pBase = pFunction;
-        m_pReplace = pDetour;
+        m_pReplace = reinterpret_cast<void*>(pDetour);
 
         MH_STATUS status = MH_CreateHook(m_pBase, m_pReplace, &m_pOriginal);
         if (status != MH_OK)

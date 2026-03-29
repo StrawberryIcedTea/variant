@@ -1,5 +1,7 @@
 #pragma once
 #include "../includes.h"
+#include "../sdk/interfaces/iglobalvars.h"
+#include "../sdk/interfaces/iengineclient.h"
 
 // Game interfaces discovered at runtime
 namespace I
@@ -13,15 +15,33 @@ namespace I
     inline HWND hGameWindow = nullptr;
 
     // Swap chain vtable — captured from dummy device during Setup
-    void** GetSwapChainVTable();
+    inline void** pSwapChainVTable = nullptr;
 
     // InputSystem - for cursor control (IsRelativeMouseMode vtable hook)
     inline void* pInputSystem = nullptr;
 
+    // IEngineClient — Source2EngineToClient001 from engine2.dll
+    inline IEngineClient* pEngine = nullptr;
+
     // Game entity access
     inline void* pGameResourceService = nullptr; // IGameResourceService from engine2.dll
-    inline void* pEntitySystem = nullptr;        // CGameEntitySystem* (offset 0x58 from resource service)
+    inline void* pEntitySystem = nullptr;        // CGameEntitySystem* (pattern-scanned)
 
-    // CCSGOInput object pointer — resolved via dwCSGOInput offset, used for vtable[5] hooking
+    // CCSGOInput — hardcoded offset from cs2-dumper (pattern scans unreliable)
+    // Used for vtable hooks: CreateMove[5], Prediction[16], CreateMoveInner[22]
     inline void* pCSGOInput = nullptr;
+
+    // IEngineCVar — convar system (tier0.dll "VEngineCvar007")
+    inline void* pCvar = nullptr;
+
+    // IGlobalVars — engine timing state (curtime, frametime, tickcount)
+    inline IGlobalVars* pGlobalVars = nullptr;
+
+    // GetMatrixForView — pattern-scanned function, non-fatal (WorldToScreen disabled if null)
+    inline void* pGetMatrixForView = nullptr;
+
+    inline float GetTickInterval()
+    {
+        return (pGlobalVars && pGlobalVars->flIntervalPerTick > 0.f) ? pGlobalVars->flIntervalPerTick : 1.f / 64.f;
+    }
 }

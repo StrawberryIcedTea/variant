@@ -16,7 +16,7 @@
 #include "core/interfaces.h"
 #include "core/hooks/hooks.h"
 #include "utilities/debug.h"
-#include "utilities/inputhook.h"
+#include "utilities/input.h"
 
 DWORD WINAPI DllInitialization(LPVOID lpModule)
 {
@@ -29,7 +29,6 @@ DWORD WINAPI DllInitialization(LPVOID lpModule)
     // Wait for CS2 to finish loading
     while (!GetModuleHandleA("client.dll"))
         Sleep(200);
-    C::Print("[main] client.dll found");
 
     if (!I::Setup())
     {

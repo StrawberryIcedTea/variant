@@ -2,7 +2,6 @@
 #include "../../includes.h"
 #include "../../utilities/hookmanager.h"
 #include "../interfaces.h"
-#include <dxgi.h>
 
 namespace VTABLE
 {
@@ -17,6 +16,7 @@ namespace VTABLE
 
         /* CCSGOInput */
         CREATEMOVE = 5,
+        PREDICTION = 16,
         CREATEMOVE_INNER = 22
     };
 }
@@ -28,7 +28,9 @@ namespace DTR
     inline HookManager IsRelativeMouseMode;
     inline HookManager SDLSetRelMouseMode;
     inline HookManager CreateMove;
+    inline HookManager Prediction;
     inline HookManager CreateMoveInner;
+    inline HookManager GetMatrixForView;
 }
 
 namespace H

@@ -5,7 +5,7 @@
 #include "../../menu/menu.h"
 #include "../hooks.h"
 #include "../cursor/cursor.h"
-#include "../../../utilities/inputhook.h"
+#include "../../../utilities/input.h"
 
 #include "../../../../dependencies/imgui/imgui.h"
 #include "../../../../dependencies/imgui/imgui_impl_win32.h"

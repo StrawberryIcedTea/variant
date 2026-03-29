@@ -14,17 +14,26 @@ add_library(variant SHARED)
 target_sources(variant PRIVATE
     src/main.cpp
     src/core/interfaces.cpp
-    src/sdk/entitysystem.cpp
-    src/sdk/usercmd.cpp
+    src/core/schema.cpp
+    src/core/convars.cpp
+    src/core/crc.cpp
+    src/sdk/entity.cpp
+
     src/core/hooks/hooks.cpp
     src/core/hooks/render/render.cpp
     src/core/hooks/cursor/cursor.cpp
     src/core/hooks/createmove/createmove.cpp
+    src/core/hooks/prediction/prediction.cpp
+    src/core/hooks/viewmatrix/viewmatrix.cpp
     src/core/menu/menu.cpp
-    src/features/movement.cpp
+    src/features/movement/bhop/bhop.cpp
+    src/features/movement/autostrafe/autostrafe.cpp
+    src/features/movement/jumpbug/jumpbug.cpp
+    src/features/movement/edgebug/edgebug.cpp
+    src/features/movement/validate/validate.cpp
     src/utilities/debug.cpp
     src/utilities/memory.cpp
-    src/utilities/inputhook.cpp
+    src/utilities/input.cpp
 )
 
 # ImGui

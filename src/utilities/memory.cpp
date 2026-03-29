@@ -48,17 +48,9 @@ bool M::GetModuleInfo(const char* moduleName, uintptr_t& base, size_t& size)
     return true;
 }
 
-uintptr_t M::FindPattern(const char* moduleName, const char* pattern)
+// Core scan — no logging, used by both overloads
+static uintptr_t ScanModule(uintptr_t base, size_t size, const char* pattern)
 {
-    uintptr_t base = 0;
-    size_t size = 0;
-
-    if (!GetModuleInfo(moduleName, base, size))
-    {
-        C::Print(std::format("[memory] module not found: {}", moduleName));
-        return 0;
-    }
-
     auto patternBytes = PatternToBytes(pattern);
     const auto scanBytes = reinterpret_cast<uint8_t*>(base);
     const auto patSize = patternBytes.size();
@@ -83,8 +75,62 @@ uintptr_t M::FindPattern(const char* moduleName, const char* pattern)
             return base + i;
     }
 
-    C::Print(std::format("[memory] pattern not found in {}: {}", moduleName, pattern));
     return 0;
+}
+
+uintptr_t M::FindPattern(const char* moduleName, const char* pattern)
+{
+    uintptr_t base = 0;
+    size_t size = 0;
+
+    if (!GetModuleInfo(moduleName, base, size))
+    {
+        C::Print(std::format("[memory] module not found: {}", moduleName));
+        return 0;
+    }
+
+    uintptr_t result = ScanModule(base, size, pattern);
+    if (!result)
+        C::Print(std::format("[memory] pattern not found in {}: {}", moduleName, pattern));
+
+    return result;
+}
+
+uintptr_t M::FindPattern(const char* moduleName, const char** patterns, size_t count)
+{
+    uintptr_t base = 0;
+    size_t size = 0;
+
+    if (!GetModuleInfo(moduleName, base, size))
+    {
+        C::Print(std::format("[memory] module not found: {}", moduleName));
+        return 0;
+    }
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        uintptr_t result = ScanModule(base, size, patterns[i]);
+        if (result)
+            return result;
+    }
+
+    C::Print(std::format("[memory] all {} patterns failed in {}", count, moduleName));
+    return 0;
+}
+
+uintptr_t M::FindNextPattern(const char* moduleName, const char* pattern, uintptr_t after)
+{
+    uintptr_t base = 0;
+    size_t size = 0;
+    if (!GetModuleInfo(moduleName, base, size))
+        return 0;
+
+    uintptr_t start = after + 1;
+    if (start < base || start >= base + size)
+        return 0;
+
+    size_t offset = start - base;
+    return ScanModule(start, size - offset, pattern);
 }
 
 uintptr_t M::ResolveRelative(uintptr_t addr, int offset, int instrLen)
