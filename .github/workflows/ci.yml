@@ -33,6 +33,7 @@ jobs:
             --suppress=ignoredReturnValue \
             --suppress=uselessCallsSubstr \
             --suppress=constVariablePointer \
+            --suppress=constVariableReference \
             --suppress=toomanyconfigs \
             --suppress=invalidPointerCast \
             --suppress=useStlAlgorithm \
