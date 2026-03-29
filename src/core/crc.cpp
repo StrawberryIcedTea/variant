@@ -209,7 +209,7 @@ static bool RebuildInternal(CBaseUserCmdPB* pBaseCmd)
     pBaseCmd->nCachedSize |= 1;
 
     uint32_t nBits = pBaseCmd->nHasBits & ~3u;
-    pBaseCmd->pMoveCrc = s_fnSetData(&pBaseCmd->pMoveCrc, msgBuf, &nBits);
+    pBaseCmd->pMoveCrc = s_fnSetData(static_cast<void*>(&pBaseCmd->pMoveCrc), msgBuf, &nBits);
 
     return true;
 }

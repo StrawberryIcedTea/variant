@@ -142,7 +142,7 @@ void Movement::AutoStrafe(CUserCmd* pCmd, C_BaseEntity* pLocal)
     float vx = vel[0], vy = vel[1];
     float yawRad = flYaw * kDegToRad;
 
-    float friction, stamina;
+    float friction = 1.f, stamina = 0.f;
     GetMovementParams(pLocal, friction, stamina);
 
     if (stamina > 0.f)
@@ -158,7 +158,7 @@ void Movement::AutoStrafe(CUserCmd* pCmd, C_BaseEntity* pLocal)
 
     if (Vars.nAutoStrafeMode == Variables_t::STRAFE_NORMAL)
     {
-        float fwd, side, wishX, wishY;
+        float fwd = 0.f, side = 0.f, wishX = 0.f, wishY = 0.f;
         CalcOptimalStrafe(vx, vy, yawRad, direction, airMaxWish, fwd, side, wishX, wishY);
         pBase->flForwardMove = fwd;
         pBase->flSideMove = side;
@@ -177,7 +177,7 @@ void Movement::AutoStrafe(CUserCmd* pCmd, C_BaseEntity* pLocal)
 
     for (int i = 0; i < nSteps; ++i)
     {
-        float fwd, side, wishX, wishY;
+        float fwd = 0.f, side = 0.f, wishX = 0.f, wishY = 0.f;
         CalcOptimalStrafe(vx, vy, yawRad, direction, airMaxWish, fwd, side, wishX, wishY);
 
         float flDeltaFwd = fwd - flMoveFwd;
