@@ -49,10 +49,12 @@ static CMaterial2* CreateMat(const char* szName, const char* szVmat, void*& outH
     if (!vtbl || !VirtualQuery(reinterpret_cast<void*>(vtbl), &mbi, sizeof(mbi)) || mbi.Type != MEM_IMAGE)
     {
         C::Print(std::format("[chams] bad vtable: {}", szName));
+        delete[] buf;
         return nullptr;
     }
 
     outHolder = pHolder;
+    delete[] buf;
     return pMat;
 }
 
@@ -181,7 +183,6 @@ void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis, CSceneAn
     Color_t col2 = pickColor(Vars.flChamsEnemyColor2, Vars.flChamsTeamColor2, Vars.flChamsSelfColor2);
 
     int t1 = Vars.nChamsMaterial < 2 ? Vars.nChamsMaterial : 0;
-    int t2 = Vars.nChamsMaterial2 < 2 ? Vars.nChamsMaterial2 : 0;
 
     auto applyPass = [&](int from, int to, int type, bool xqz, Color_t col)
     {
@@ -194,6 +195,8 @@ void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis, CSceneAn
 
     if (Vars.bChamsDouble)
     {
+        int t2 = Vars.nChamsMaterial2 < 2 ? Vars.nChamsMaterial2 : 0;
+
         int b1 = pBuf->m_count;
         oFn(pThis, pObject, pUnk, pBuf);
         applyPass(b1, pBuf->m_count, t1, Vars.bChamsXQZ, col1);
