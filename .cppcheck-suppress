@@ -1,5 +1,6 @@
 // SDK overlay structs — game memory layouts, never constructed by us
 noConstructor:src/sdk/entity.h
+noConstructor:src/sdk/material.h
 
 // Schema field accessors reinterpret_cast uint8_t* → T* intentionally:
 // the pointer arithmetic lands on real game memory of that type.

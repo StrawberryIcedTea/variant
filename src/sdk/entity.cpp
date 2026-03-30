@@ -6,17 +6,24 @@
 // -----------------------------------------------------------------------
 // Local player accessors -- via IEngineClient::GetLocalPlayer() + entity system
 // -----------------------------------------------------------------------
+CGameEntitySystem* EntitySystem::GetEntitySystem()
+{
+    if (!I::ppEntitySystem)
+        return nullptr;
+    return static_cast<CGameEntitySystem*>(*I::ppEntitySystem);
+}
+
 CCSPlayerController* EntitySystem::GetLocalController()
 {
-    if (!I::pEngine || !I::pEntitySystem)
+    auto* pES = GetEntitySystem();
+    if (!pES || !I::pEngine)
         return nullptr;
 
-    auto* pEntitySystem = static_cast<CGameEntitySystem*>(I::pEntitySystem);
     int nIndex = I::pEngine->GetLocalPlayer();
     if (nIndex <= 0)
         return nullptr;
 
-    return pEntitySystem->Get<CCSPlayerController>(nIndex);
+    return pES->Get<CCSPlayerController>(nIndex);
 }
 
 C_BaseEntity* EntitySystem::GetLocalPlayerPawn()
@@ -29,11 +36,9 @@ C_BaseEntity* EntitySystem::GetLocalPlayerPawn()
     if (!hPawn.IsValid())
         return nullptr;
 
-    auto* pEntitySystem = static_cast<CGameEntitySystem*>(I::pEntitySystem);
-    return pEntitySystem->Get<C_BaseEntity>(hPawn);
-}
+    auto* pES = GetEntitySystem();
+    if (!pES)
+        return nullptr;
 
-CGameEntitySystem* EntitySystem::GetEntitySystem()
-{
-    return static_cast<CGameEntitySystem*>(I::pEntitySystem);
+    return pES->Get<C_BaseEntity>(hPawn);
 }

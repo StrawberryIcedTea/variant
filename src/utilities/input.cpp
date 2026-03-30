@@ -19,6 +19,9 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         if (kb->vkCode == VK_END && wParam == WM_KEYDOWN)
             Input::bEndPressed.store(true);
 
+        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
+            Input::nLastVK.store(static_cast<int>(kb->vkCode));
+
         if (kb->vkCode == VK_SPACE)
         {
             if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)

@@ -6,10 +6,13 @@
 #include "../hooks.h"
 #include "../cursor/cursor.h"
 #include "../../../utilities/input.h"
+#include "../../../global.h"
 
 #include "../../../../dependencies/imgui/imgui.h"
 #include "../../../../dependencies/imgui/imgui_impl_win32.h"
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #include "../../../../dependencies/imgui/imgui_impl_dx11.h"
+#include "../../../../dependencies/imgui/imgui_freetype.h"
 
 // ---------------------------------------------------------------------------
 // Render target helpers
@@ -55,6 +58,65 @@ bool Render::InitImGui(IDXGISwapChain* pSwapChain)
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
+    // Load fonts — paths resolved relative to the DLL's own directory
+    {
+        ImGuiIO& ioFonts = ImGui::GetIO();
+
+        // Resolve a font filename to a full path beside the DLL
+        auto fontPath = [](const char* szFile) -> std::string
+        {
+            char szDll[MAX_PATH] = {};
+            GetModuleFileNameA(G::hDll, szDll, MAX_PATH);
+            std::string s(szDll);
+            const auto slash = s.find_last_of("\\/");
+            s = (slash != std::string::npos ? s.substr(0, slash + 1) : "") + "fonts\\" + szFile;
+            return s;
+        };
+
+        auto fileExists = [](const std::string& path) -> bool
+        {
+            FILE* f = nullptr;
+            return fopen_s(&f, path.c_str(), "rb") == 0 && f && (fclose(f), true);
+        };
+
+        auto loadFont = [&](const char* szFile, float size, unsigned int flags) -> ImFont*
+        {
+            const std::string path = fontPath(szFile);
+            if (!fileExists(path))
+                return nullptr;
+            ImFontConfig cfg;
+            cfg.FontBuilderFlags = flags;
+            return ioFonts.Fonts->AddFontFromFileTTF(path.c_str(), size, &cfg);
+        };
+
+        // Inter Bold 700 — default body font (added first so it becomes ImGui's default)
+        pFontInterMedium = loadFont("Inter_18pt-Bold.ttf", 11.f, ImGuiFreeTypeBuilderFlags_ForceAutoHint);
+        if (!pFontInterMedium)
+            pFontInterMedium = ioFonts.Fonts->AddFontDefault();
+
+        // Inter ExtraBold 800 — sidebar logo + page headings
+        pFontInterExtraBold = loadFont("Inter_18pt-ExtraBold.ttf", 16.f, ImGuiFreeTypeBuilderFlags_ForceAutoHint);
+        if (!pFontInterExtraBold)
+            pFontInterExtraBold = ioFonts.Fonts->AddFontDefault();
+
+        // icons.ttf — SVG-derived tab icons, private-use area U+E000–U+E003
+        {
+            const std::string path = fontPath("icons.ttf");
+            if (fileExists(path))
+            {
+                static const ImWchar iconRanges[] = {0xE000, 0xE003, 0};
+                ImFontConfig cfg;
+                cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_NoHinting;
+                pFontIcons = ioFonts.Fonts->AddFontFromFileTTF(path.c_str(), 28.f, &cfg, iconRanges);
+            }
+        }
+
+        // Build atlas with FreeType instead of stb_truetype
+        ImGuiFreeType::BuildFontAtlas(ioFonts.Fonts, 0);
+    }
+
+    Menu::ApplyTheme();
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
@@ -245,6 +307,7 @@ LRESULT CALLBACK Render::hkWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
         case WM_XBUTTONDBLCLK:
         case WM_MOUSEWHEEL:
         case WM_MOUSEHWHEEL:
+            ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
             return 0;
         default:
             break;
