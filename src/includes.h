@@ -2,6 +2,8 @@
 
 // Windows
 #include <Windows.h>
+#include <psapi.h>
+#pragma comment(lib, "psapi.lib")
 
 // C++ standard
 #include <cstdint>

@@ -17,7 +17,10 @@ namespace VTABLE
         /* CCSGOInput */
         CREATEMOVE = 5,
         PREDICTION = 16,
-        CREATEMOVE_INNER = 22
+        CREATEMOVE_INNER = 22,
+
+        /* CAnimatableSceneObject (scenesystem.dll) */
+        GENERATE_PRIMITIVES = 4,
     };
 }
 
@@ -31,6 +34,7 @@ namespace DTR
     inline HookManager Prediction;
     inline HookManager CreateMoveInner;
     inline HookManager GetMatrixForView;
+    inline HookManager GeneratePrimitives;
 }
 
 namespace H

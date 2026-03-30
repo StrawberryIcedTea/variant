@@ -25,7 +25,9 @@ target_sources(variant PRIVATE
     src/core/hooks/createmove/createmove.cpp
     src/core/hooks/prediction/prediction.cpp
     src/core/hooks/viewmatrix/viewmatrix.cpp
+    src/core/hooks/generateprimitives/generateprimitives.cpp
     src/core/menu/menu.cpp
+    src/features/visuals/chams/chams.cpp
     src/features/movement/bhop/bhop.cpp
     src/features/movement/autostrafe/autostrafe.cpp
     src/features/movement/jumpbug/jumpbug.cpp
