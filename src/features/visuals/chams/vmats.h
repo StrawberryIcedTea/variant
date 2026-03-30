@@ -5,8 +5,8 @@
 namespace VMat
 {
 
-static constexpr char Flat[] =
-R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+    static constexpr char Flat[] =
+        R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
     shader = "csgo_character.vfx"
     F_BLEND_MODE = 1
@@ -19,8 +19,8 @@ R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:g
     g_tMetalness = resource:"materials/default/default_metal_tga_8fbc2820.vtex"
 })";
 
-static constexpr char FlatXQZ[] =
-R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+    static constexpr char FlatXQZ[] =
+        R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
     shader = "csgo_character.vfx"
     F_DISABLE_Z_BUFFERING = 1
@@ -36,8 +36,8 @@ R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:g
     g_tMetalness = resource:"materials/default/default_metal_tga_8fbc2820.vtex"
 })";
 
-static constexpr char Glow[] =
-R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+    static constexpr char Glow[] =
+        R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
     shader = "csgo_effects.vfx"
     g_tColor = resource:"materials/dev/primary_white_color_tga_21186c76.vtex"
@@ -59,8 +59,8 @@ R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:g
     g_vColorTint = [1.0, 1.0, 1.0]
 })";
 
-static constexpr char GlowXQZ[] =
-R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+    static constexpr char GlowXQZ[] =
+        R"(<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
 {
     shader = "csgo_effects.vfx"
     g_tColor = resource:"materials/dev/primary_white_color_tga_21186c76.vtex"

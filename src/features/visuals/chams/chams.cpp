@@ -14,8 +14,8 @@ static constexpr uint64_t k_kv3Unk0 = 0x469806E97412167CULL;
 static constexpr uint64_t k_kv3Unk1 = 0xE73790B53EE6F2AFULL;
 
 // s_pMat[type][xqz]: type 0=Flat 1=Glow, xqz 0=visible 1=through-wall
-static CMaterial2* s_pMat[2][2]    = {};
-static void*       s_pHolder[2][2] = {};
+static CMaterial2* s_pMat[2][2] = {};
+static void* s_pHolder[2][2] = {};
 
 static CMaterial2* CreateMat(const char* szName, const char* szVmat, void*& outHolder)
 {
@@ -25,7 +25,7 @@ static CMaterial2* CreateMat(const char* szName, const char* szVmat, void*& outH
     auto* buf = new uint8_t[0x100 + 0x200]();
     auto* kv3 = reinterpret_cast<CKeyValues3*>(buf + 0x100);
 
-    KV3ID_t id{ "generic", k_kv3Unk0, k_kv3Unk1 };
+    KV3ID_t id{"generic", k_kv3Unk0, k_kv3Unk1};
     if (!I::fnLoadKV3(kv3, nullptr, szVmat, &id, nullptr))
     {
         C::Print(std::format("[chams] LoadKV3 failed: {}", szName));
@@ -58,9 +58,9 @@ static CMaterial2* CreateMat(const char* szName, const char* szVmat, void*& outH
 
 bool Chams::Setup()
 {
-    s_pMat[0][0] = CreateMat("variant/chams_flat_vis.vmat", VMat::Flat,    s_pHolder[0][0]);
+    s_pMat[0][0] = CreateMat("variant/chams_flat_vis.vmat", VMat::Flat, s_pHolder[0][0]);
     s_pMat[0][1] = CreateMat("variant/chams_flat_xqz.vmat", VMat::FlatXQZ, s_pHolder[0][1]);
-    s_pMat[1][0] = CreateMat("variant/chams_glow_vis.vmat", VMat::Glow,    s_pHolder[1][0]);
+    s_pMat[1][0] = CreateMat("variant/chams_glow_vis.vmat", VMat::Glow, s_pHolder[1][0]);
     s_pMat[1][1] = CreateMat("variant/chams_glow_xqz.vmat", VMat::GlowXQZ, s_pHolder[1][1]);
     return s_pMat[0][0] != nullptr;
 }
@@ -76,19 +76,18 @@ static void MaterialRange(CMeshPrimitiveOutputBuffer* pBuf, int from, int to, CM
     for (int i = from; i < to; ++i)
     {
         pBuf->m_out[i].pMaterial = pMat;
-        pBuf->m_out[i].colValue  = col;
+        pBuf->m_out[i].colValue = col;
     }
 }
 
 static Color_t FloatToColor(const float* c)
 {
-    return { static_cast<uint8_t>(c[0] * 255.f), static_cast<uint8_t>(c[1] * 255.f),
-             static_cast<uint8_t>(c[2] * 255.f), static_cast<uint8_t>(c[3] * 255.f) };
+    return {static_cast<uint8_t>(c[0] * 255.f), static_cast<uint8_t>(c[1] * 255.f), static_cast<uint8_t>(c[2] * 255.f),
+            static_cast<uint8_t>(c[3] * 255.f)};
 }
 
-void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis,
-                                  CSceneAnimatableObject* pObject, void* pUnk,
-                                  CMeshPrimitiveOutputBuffer* pBuf)
+void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis, CSceneAnimatableObject* pObject, void* pUnk,
+                                 CMeshPrimitiveOutputBuffer* pBuf)
 {
     static bool s_ready = Setup();
 
@@ -137,14 +136,18 @@ void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis,
         return;
     }
 
-    auto* pLocalPawn  = EntitySystem::GetLocalPlayerPawn();
-    bool  isSelf      = (pEnt == pLocalPawn);
+    auto* pLocalPawn = EntitySystem::GetLocalPlayerPawn();
+    bool isSelf = (pEnt == pLocalPawn);
     uint8_t localTeam = pLocalPawn ? pLocalPawn->GetTeamNum() : 0;
-    bool  isEnemy     = (team != localTeam);
+    bool isEnemy = (team != localTeam);
 
     if (isSelf)
     {
-        if (!Vars.bChamsSelf) { oFn(pThis, pObject, pUnk, pBuf); return; }
+        if (!Vars.bChamsSelf)
+        {
+            oFn(pThis, pObject, pUnk, pBuf);
+            return;
+        }
 
         // Applying chams in first-person makes feet/legs invisible.
         // Suppress when alive unless cl_thirdperson is on.
@@ -160,25 +163,33 @@ void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis,
             return;
         }
     }
-    else if (isEnemy  && !Vars.bChamsEnemies)   { oFn(pThis, pObject, pUnk, pBuf); return; }
-    else if (!isEnemy && !Vars.bChamsTeammates)  { oFn(pThis, pObject, pUnk, pBuf); return; }
+    else if (isEnemy && !Vars.bChamsEnemies)
+    {
+        oFn(pThis, pObject, pUnk, pBuf);
+        return;
+    }
+    else if (!isEnemy && !Vars.bChamsTeammates)
+    {
+        oFn(pThis, pObject, pUnk, pBuf);
+        return;
+    }
 
     auto pickColor = [&](const float* enemy, const float* team, const float* self) -> Color_t
-    {
-        return FloatToColor(isSelf ? self : (isEnemy ? enemy : team));
-    };
+    { return FloatToColor(isSelf ? self : (isEnemy ? enemy : team)); };
 
-    Color_t col1 = pickColor(Vars.flChamsEnemyColor,  Vars.flChamsTeamColor,  Vars.flChamsSelfColor);
+    Color_t col1 = pickColor(Vars.flChamsEnemyColor, Vars.flChamsTeamColor, Vars.flChamsSelfColor);
     Color_t col2 = pickColor(Vars.flChamsEnemyColor2, Vars.flChamsTeamColor2, Vars.flChamsSelfColor2);
 
-    int t1 = Vars.nChamsMaterial  < 2 ? Vars.nChamsMaterial  : 0;
+    int t1 = Vars.nChamsMaterial < 2 ? Vars.nChamsMaterial : 0;
     int t2 = Vars.nChamsMaterial2 < 2 ? Vars.nChamsMaterial2 : 0;
 
     auto applyPass = [&](int from, int to, int type, bool xqz, Color_t col)
     {
         CMaterial2* pMat = s_pMat[type][xqz ? 1 : 0];
-        if (pMat) MaterialRange(pBuf, from, to, pMat, col);
-        else      TintRange(pBuf, from, to, col);
+        if (pMat)
+            MaterialRange(pBuf, from, to, pMat, col);
+        else
+            TintRange(pBuf, from, to, col);
     };
 
     if (Vars.bChamsDouble)

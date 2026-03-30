@@ -4,7 +4,6 @@
 namespace Chams
 {
     bool Setup();
-    void OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis,
-                               CSceneAnimatableObject* pObject, void* pUnk,
-                               CMeshPrimitiveOutputBuffer* pBuf);
+    void OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis, CSceneAnimatableObject* pObject, void* pUnk,
+                              CMeshPrimitiveOutputBuffer* pBuf);
 }

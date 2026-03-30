@@ -23,10 +23,10 @@ struct CMaterial2;
 // -----------------------------------------------------------------------
 struct CSceneAnimatableObject
 {
-    char        _pad[0xC0];
-    CBaseHandle hOwner;  // +0xC0 — player pawn handle (verified: hp=100, team=2/3)
-                         // +0xB8 is a non-player entity (idx=320, team=0)
-                         // +0x80 is CCSTeam entity (idx=1/3), shared by all team objects
+    char _pad[0xC0];
+    CBaseHandle hOwner; // +0xC0 — player pawn handle (verified: hp=100, team=2/3)
+                        // +0xB8 is a non-player entity (idx=320, team=0)
+                        // +0x80 is CCSTeam entity (idx=1/3), shared by all team objects
 };
 
 // -----------------------------------------------------------------------
@@ -40,17 +40,17 @@ struct CSceneAnimatableObject
 // -----------------------------------------------------------------------
 struct CMeshData
 {
-    char        _pad0[0x20];    // +0x00 vtable + other fields
-    CMaterial2* pMaterial;      // +0x20
-    uint64_t    nSortKey;       // +0x28 sort key (hash of original material)
-    char        _pad1[0x20];    // +0x30..+0x4F (+0x30 and +0x38 confirmed NULL in dump)
-    Color_t     colValue;       // +0x50
-    char        _pad2[0x14];    // +0x54..+0x67 — pad to verified stride
+    char _pad0[0x20];      // +0x00 vtable + other fields
+    CMaterial2* pMaterial; // +0x20
+    uint64_t nSortKey;     // +0x28 sort key (hash of original material)
+    char _pad1[0x20];      // +0x30..+0x4F (+0x30 and +0x38 confirmed NULL in dump)
+    Color_t colValue;      // +0x50
+    char _pad2[0x14];      // +0x54..+0x67 — pad to verified stride
 };
 static_assert(offsetof(CMeshData, pMaterial) == 0x20);
-static_assert(offsetof(CMeshData, nSortKey)  == 0x28);
-static_assert(offsetof(CMeshData, colValue)  == 0x50);
-static_assert(sizeof(CMeshData)              == 0x68);
+static_assert(offsetof(CMeshData, nSortKey) == 0x28);
+static_assert(offsetof(CMeshData, colValue) == 0x50);
+static_assert(sizeof(CMeshData) == 0x68);
 
 // -----------------------------------------------------------------------
 // CMeshPrimitiveOutputBuffer -- output buffer filled by GeneratePrimitives
@@ -58,9 +58,9 @@ static_assert(sizeof(CMeshData)              == 0x68);
 // -----------------------------------------------------------------------
 struct CMeshPrimitiveOutputBuffer
 {
-    CMeshData* m_out;           // +0x00: primitive array
-    int32_t    m_maxPrimitives; // +0x08: capacity
-    int32_t    m_count;         // +0x0C: current fill index (incremented by original)
+    CMeshData* m_out;        // +0x00: primitive array
+    int32_t m_maxPrimitives; // +0x08: capacity
+    int32_t m_count;         // +0x0C: current fill index (incremented by original)
 };
 
 // GeneratePrimitives function type (VCAnimatableSceneObjectDesc vtable)
@@ -83,17 +83,17 @@ using GeneratePrimitivesFn = void(__fastcall*)(void*, CSceneAnimatableObject*, v
 // Allocate: new uint8_t[0x100 + sizeof(CKeyValues3)](), then use ptr+0x100 as CKeyValues3*.
 struct CKeyValues3
 {
-    uint64_t uKey;   // +0x00
-    void*    pValue; // +0x08
-    char     _pad[0x8];
+    uint64_t uKey; // +0x00
+    void* pValue;  // +0x08
+    char _pad[0x8];
 };
 
 struct KV3ID_t
 {
     const char* szName;
-    uint64_t    unk0;
-    uint64_t    unk1;
+    uint64_t unk0;
+    uint64_t unk1;
 };
 
-using LoadKV3Fn   = bool(__fastcall*)(CKeyValues3*, void*, const char*, const KV3ID_t*, const char*);
+using LoadKV3Fn = bool(__fastcall*)(CKeyValues3*, void*, const char*, const KV3ID_t*, const char*);
 using CreateMatFn = int64_t(__fastcall*)(void*, CMaterial2**, const char*, CKeyValues3*, unsigned int, unsigned int);

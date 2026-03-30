@@ -70,21 +70,26 @@ namespace M
     // Returns vtable[0] pointer, or nullptr on failure.
     inline void** FindVTable(const char* moduleName, const char* className)
     {
-        uintptr_t base; size_t size;
+        uintptr_t base;
+        size_t size;
         if (!GetModuleInfo(moduleName, base, size))
             return nullptr;
 
         char needle[256];
         snprintf(needle, sizeof(needle), ".?AV%s@@", className);
-        const size_t    nlen = strlen(needle);
-        const uintptr_t end  = base + size;
+        const size_t nlen = strlen(needle);
+        const uintptr_t end = base + size;
 
         // 1. TypeDescriptor: mangled name sits at td+0x10
         uintptr_t td = 0;
         for (uintptr_t p = base; p + nlen < end; ++p)
             if (memcmp(reinterpret_cast<const void*>(p), needle, nlen) == 0)
-                { td = p - 0x10; break; }
-        if (!td) return nullptr;
+            {
+                td = p - 0x10;
+                break;
+            }
+        if (!td)
+            return nullptr;
 
         // 2. Primary CompleteObjectLocator: sig=1, offset=0, typeDescRVA at +0x0C
         const uint32_t tdRVA = static_cast<uint32_t>(td - base);
@@ -93,11 +98,14 @@ namespace M
             if (*reinterpret_cast<const uint32_t*>(p) == tdRVA)
             {
                 uintptr_t c = p - 0x0C;
-                if (*reinterpret_cast<const uint32_t*>(c)     == 1u &&
-                    *reinterpret_cast<const uint32_t*>(c + 4) == 0u)
-                    { col = c; break; }
+                if (*reinterpret_cast<const uint32_t*>(c) == 1u && *reinterpret_cast<const uint32_t*>(c + 4) == 0u)
+                {
+                    col = c;
+                    break;
+                }
             }
-        if (!col) return nullptr;
+        if (!col)
+            return nullptr;
 
         // 3. vtable[0]: the 8 bytes before it hold a pointer to the COL
         for (uintptr_t p = base + 8; p + 8 < end; p += 8)

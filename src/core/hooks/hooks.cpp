@@ -22,10 +22,12 @@ bool H::Setup()
     if (!DTR::ResizeBuffers.Create(I::pSwapChainVTable[VTABLE::RESIZEBUFFERS], &Render::hkResizeBuffers))
         return false;
 
-    if (!DTR::IsRelativeMouseMode.Create(M::GetVFunc(I::pInputSystem, VTABLE::ISRELATIVEMOUSEMODE), &Cursor::hkIsRelativeMouseMode))
+    if (!DTR::IsRelativeMouseMode.Create(M::GetVFunc(I::pInputSystem, VTABLE::ISRELATIVEMOUSEMODE),
+                                         &Cursor::hkIsRelativeMouseMode))
         return false;
 
-    if (!DTR::SDLSetRelMouseMode.Create(M::GetExport("SDL3.dll", "SDL_SetWindowRelativeMouseMode"), &Cursor::hkSDL_SetWindowRelativeMouseMode))
+    if (!DTR::SDLSetRelMouseMode.Create(M::GetExport("SDL3.dll", "SDL_SetWindowRelativeMouseMode"),
+                                        &Cursor::hkSDL_SetWindowRelativeMouseMode))
         return false;
 
     if (!DTR::CreateMove.Create(M::GetVFunc(I::pCSGOInput, VTABLE::CREATEMOVE), &CreateMove::hkCreateMove))
@@ -34,13 +36,15 @@ bool H::Setup()
     if (!DTR::Prediction.Create(M::GetVFunc(I::pCSGOInput, VTABLE::PREDICTION), &Prediction::hkPredictionSimulation))
         return false;
 
-    if (!DTR::CreateMoveInner.Create(M::GetVFunc(I::pCSGOInput, VTABLE::CREATEMOVE_INNER), &CreateMove::hkCreateMoveInner))
+    if (!DTR::CreateMoveInner.Create(M::GetVFunc(I::pCSGOInput, VTABLE::CREATEMOVE_INNER),
+                                     &CreateMove::hkCreateMoveInner))
         return false;
 
     if (!DTR::GetMatrixForView.Create(I::pGetMatrixForView, &ViewMatrix::hkGetMatrixForView))
         return false;
 
-    if (!DTR::GeneratePrimitives.Create(I::pAnimatableSceneObjectVTable[VTABLE::GENERATE_PRIMITIVES], &GeneratePrimitives::hkGeneratePrimitives))
+    if (!DTR::GeneratePrimitives.Create(I::pAnimatableSceneObjectVTable[VTABLE::GENERATE_PRIMITIVES],
+                                        &GeneratePrimitives::hkGeneratePrimitives))
         return false;
 
     return true;

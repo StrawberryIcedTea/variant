@@ -25,10 +25,10 @@ namespace I
     inline IEngineClient* pEngine = nullptr;
 
     // Game entity access
-    inline void* pGameResourceService = nullptr;  // IGameResourceService from engine2.dll
-    inline void** ppEntitySystem      = nullptr;  // &CGameEntitySystem* global in client.dll
-                                                   // Dereferenced each access — entity system
-                                                   // is recreated on map load, direct ptr goes stale
+    inline void* pGameResourceService = nullptr; // IGameResourceService from engine2.dll
+    inline void** ppEntitySystem = nullptr;      // &CGameEntitySystem* global in client.dll
+                                                 // Dereferenced each access — entity system
+                                                 // is recreated on map load, direct ptr goes stale
 
     // CCSGOInput — hardcoded offset from cs2-dumper (pattern scans unreliable)
     // Used for vtable hooks: CreateMove[5], Prediction[16], CreateMoveInner[22]
@@ -47,9 +47,9 @@ namespace I
     inline void** pAnimatableSceneObjectVTable = nullptr;
 
     // Material creation — required for chams; non-fatal if stale
-    inline void*       pMaterialSystem  = nullptr;  // VMaterialSystem2_001
-    inline LoadKV3Fn   fnLoadKV3        = nullptr;  // tier0.dll export
-    inline CreateMatFn fnCreateMaterial = nullptr;  // materialsystem2.dll pattern
+    inline void* pMaterialSystem = nullptr;        // VMaterialSystem2_001
+    inline LoadKV3Fn fnLoadKV3 = nullptr;          // tier0.dll export
+    inline CreateMatFn fnCreateMaterial = nullptr; // materialsystem2.dll pattern
 
     inline float GetTickInterval()
     {
