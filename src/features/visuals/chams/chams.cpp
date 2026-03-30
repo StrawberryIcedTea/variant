@@ -165,12 +165,7 @@ void Chams::OnGeneratePrimitives(GeneratePrimitivesFn oFn, void* pThis, CSceneAn
             return;
         }
     }
-    else if (isEnemy && !Vars.bChamsEnemies)
-    {
-        oFn(pThis, pObject, pUnk, pBuf);
-        return;
-    }
-    else if (!isEnemy && !Vars.bChamsTeammates)
+    else if ((isEnemy && !Vars.bChamsEnemies) || (!isEnemy && !Vars.bChamsTeammates))
     {
         oFn(pThis, pObject, pUnk, pBuf);
         return;
