@@ -6,6 +6,7 @@
 #include "createmove/createmove.h"
 #include "prediction/prediction.h"
 #include "viewmatrix/viewmatrix.h"
+#include "generateprimitives/generateprimitives.h"
 #include "../../utilities/debug.h"
 #include "../../utilities/memory.h"
 #include "../../utilities/input.h"
@@ -42,6 +43,10 @@ bool H::Setup()
     if (!DTR::GetMatrixForView.Create(I::pGetMatrixForView, &ViewMatrix::hkGetMatrixForView))
         return false;
 
+    if (!DTR::GeneratePrimitives.Create(I::pAnimatableSceneObjectVTable[VTABLE::GENERATE_PRIMITIVES],
+                                        &GeneratePrimitives::hkGeneratePrimitives))
+        return false;
+
     return true;
 }
 
@@ -55,6 +60,7 @@ void H::Restore()
 
     Render::ReleaseRenderTarget();
 
+    DTR::GeneratePrimitives.Remove();
     DTR::GetMatrixForView.Remove();
     DTR::CreateMoveInner.Remove();
     DTR::Prediction.Remove();

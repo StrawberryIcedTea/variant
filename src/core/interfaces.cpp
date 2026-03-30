@@ -124,11 +124,11 @@ bool I::Setup()
         uintptr_t addr = M::FindPattern("client.dll", entityListPats, std::size(entityListPats));
         if (addr)
         {
-            pEntitySystem = *reinterpret_cast<void**>(M::ResolveRelative(addr, 0x3, 0x7));
+            ppEntitySystem = reinterpret_cast<void**>(M::ResolveRelative(addr, 0x3, 0x7));
         }
         else
         {
-            C::Print("[interfaces] CGameEntitySystem pattern not found");
+            C::Print("[interfaces] CGameEntitySystem pattern not found (entity features disabled)");
             return false;
         }
     }
@@ -233,6 +233,47 @@ bool I::Setup()
             pGetMatrixForView = reinterpret_cast<void*>(addr);
         else
             C::Print("[interfaces] GetMatrixForView pattern not found (WorldToScreen disabled)");
+    }
+
+    // CAnimatableSceneObject vtable — RTTI scan (no singleton at startup; class name stable across updates)
+    {
+        pAnimatableSceneObjectVTable = M::FindVTable("scenesystem.dll", "CAnimatableSceneObjectDesc");
+        if (!pAnimatableSceneObjectVTable)
+            C::Print("[interfaces] CAnimatableSceneObjectDesc vtable not found (chams disabled)");
+    }
+
+    // IMaterialSystem2 — needed as 'this' for CreateMaterial
+    I::pMaterialSystem = CaptureInterface("materialsystem2.dll", "VMaterialSystem2_001");
+    if (!I::pMaterialSystem)
+        C::Print("[interfaces] VMaterialSystem2_001 not found (chams material creation disabled)");
+
+    // LoadKV3 — tier0.dll export; loads KV3 text into a CKeyValues3 block
+    {
+        HMODULE hTier0 = GetModuleHandleA("tier0.dll");
+        if (hTier0)
+        {
+            // Try both known mangled names (signature changed between CS2 builds)
+            auto* p = M::GetExport("tier0.dll", "?LoadKV3@@YA_NPEAVKeyValues3@@PEAVCUtlString@@PEBDAEBUKV3ID_t@@2@Z");
+            if (!p)
+                p = M::GetExport("tier0.dll", "?LoadKV3@@YA_NPEAVKeyValues3@@PEAVCUtlString@@PEBDAEBUKV3ID_t@@2I@Z");
+            if (p)
+                fnLoadKV3 = reinterpret_cast<LoadKV3Fn>(p);
+            else
+                C::Print("[interfaces] LoadKV3 export not found in tier0.dll (chams material creation disabled)");
+        }
+    }
+
+    // CreateMaterial — materialsystem2.dll; creates CMaterial2* from KV3 data
+    {
+        static const char* createMatPats[] = {
+            "48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 81 EC ? ? ? ? 48 8D 0D",
+            "48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 56 48 81 EC ? ? ? ? 48 8B 05",
+        };
+        uintptr_t addr = M::FindPattern("materialsystem2.dll", createMatPats, std::size(createMatPats));
+        if (addr)
+            fnCreateMaterial = reinterpret_cast<CreateMatFn>(addr);
+        else
+            C::Print("[interfaces] CreateMaterial pattern not found (chams material creation disabled)");
     }
 
     return true;
