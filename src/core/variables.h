@@ -43,6 +43,10 @@ struct Variables_t
 
     bool bJumpBug = false;
     bool bEdgeBug = false;
+
+    // Menu accent colour (RGBA float, alpha ignored — always 1)
+    // Default: saura07 red
+    float flAccentColor[4] = {1.000f, 0.000f, 0.404f, 1.00f};
 };
 
 inline Variables_t Vars;

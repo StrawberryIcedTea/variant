@@ -13,6 +13,9 @@ Checks: >
   modernize-use-using,
   -bugprone-easily-swappable-parameters,
   -bugprone-narrowing-conversions,
+  -bugprone-switch-missing-default-case,
+  -bugprone-branch-clone,
+  -bugprone-suspicious-stringview-data-usage,
   -performance-no-int-to-ptr,
   -clang-diagnostic-invalid-offsetof
 

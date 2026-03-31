@@ -2,6 +2,8 @@
 #include "../../../includes.h"
 #include <atomic>
 
+struct ImFont;
+
 // D3D11 render target + ImGui lifecycle + Present/ResizeBuffers hook handlers
 namespace Render
 {
@@ -30,5 +32,14 @@ namespace Render
     // True once ImGui has been initialized.
     // Atomic: read by Present thread, written by shutdown thread.
     inline std::atomic<bool> bImGuiInitialized = false;
+
+    // Inter Bold 700 — default body font for all menu text
+    inline ImFont* pFontInterMedium = nullptr;
+
+    // Inter ExtraBold — used for the "VARIANT" sidebar logo and page headings
+    inline ImFont* pFontInterExtraBold = nullptr;
+
+    // icons.ttf — SVG-derived tab icons (private-use area U+E000–U+E003)
+    inline ImFont* pFontIcons = nullptr;
 
 }
