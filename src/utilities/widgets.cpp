@@ -369,7 +369,8 @@ bool Widgets::MultiCombo(const char* szLabel, bool* bValues, const std::string_v
     {
         for (int i = 0; i < nItemsCount; i++)
         {
-            if (Selectable(arrItems[i].data(), bValues[i], ImGuiSelectableFlags_DontClosePopups)) // NOLINT(bugprone-suspicious-stringview-data-usage)
+            // NOLINT(bugprone-suspicious-stringview-data-usage)
+            if (Selectable(arrItems[i].data(), bValues[i], ImGuiSelectableFlags_DontClosePopups))
             {
                 bValues[i] = !bValues[i];
                 bValueChanged = true;
