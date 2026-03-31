@@ -138,7 +138,7 @@ bool Widgets::Checkbox(const char* szLabel, bool* bValue)
     if (!ItemAdd(bbTotal, id))
         return false;
 
-    bool bHovered, bHeld;
+    bool bHovered = false, bHeld = false;
     const bool bPressed = ButtonBehavior(bbTotal, id, &bHovered, &bHeld);
     if (bPressed)
         *bValue = !(*bValue);
@@ -369,7 +369,7 @@ bool Widgets::MultiCombo(const char* szLabel, bool* bValues, const std::string_v
     {
         for (int i = 0; i < nItemsCount; i++)
         {
-            if (Selectable(arrItems[i].data(), bValues[i], ImGuiSelectableFlags_DontClosePopups))
+            if (Selectable(arrItems[i].data(), bValues[i], ImGuiSelectableFlags_DontClosePopups)) // NOLINT(bugprone-suspicious-stringview-data-usage)
             {
                 bValues[i] = !bValues[i];
                 bValueChanged = true;
