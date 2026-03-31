@@ -320,7 +320,7 @@ void Menu::Render()
     // Content box
     ImGui::BeginChild("menu.content", ImVec2(), true, ImGuiWindowFlags_None);
 
-    switch (nCurrentTab) // NOLINT(hicpp-multiway-paths-covered)
+    switch (nCurrentTab)
     {
     case 0:
         break;
