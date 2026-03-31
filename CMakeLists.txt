@@ -36,6 +36,7 @@ target_sources(variant PRIVATE
     src/utilities/debug.cpp
     src/utilities/memory.cpp
     src/utilities/input.cpp
+    src/utilities/widgets.cpp
 )
 
 # ImGui
@@ -46,6 +47,7 @@ target_sources(variant PRIVATE
     dependencies/imgui/imgui_widgets.cpp
     dependencies/imgui/imgui_impl_dx11.cpp
     dependencies/imgui/imgui_impl_win32.cpp
+    dependencies/imgui/imgui_freetype.cpp
 )
 
 # MinHook (C sources)
@@ -61,6 +63,7 @@ target_sources(variant PRIVATE
 target_include_directories(variant PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/dependencies
+    ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/freetype/include
 )
 
 # ---- Definitions ----
@@ -101,4 +104,22 @@ target_link_libraries(variant PRIVATE
     d3d11
     dxgi
     psapi      # GetModuleInformation
+)
+
+# ---- Post-build: copy fonts beside the DLL ----
+add_custom_command(TARGET variant POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:variant>/fonts"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/fonts"
+        "$<TARGET_FILE_DIR:variant>/fonts"
+    COMMENT "Copying fonts to output directory"
+)
+
+# FreeType — static lib, debug/release variants
+target_link_directories(variant PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/freetype/binary
+)
+target_link_libraries(variant PRIVATE
+    $<$<CONFIG:Debug>:freetype_debug.lib>
+    $<$<CONFIG:Release>:freetype.lib>
 )

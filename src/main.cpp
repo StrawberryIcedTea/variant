@@ -13,6 +13,7 @@
 //        ░
 
 #include "includes.h"
+#include "global.h"
 #include "core/interfaces.h"
 #include "core/hooks/hooks.h"
 #include "utilities/debug.h"
@@ -70,6 +71,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
     if (dwReason == DLL_PROCESS_ATTACH)
     {
+        G::hDll = hModule;
         DisableThreadLibraryCalls(hModule);
         HANDLE hThread = CreateThread(nullptr, 0, DllInitialization, hModule, 0, nullptr);
         if (hThread)

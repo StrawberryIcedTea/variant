@@ -18,6 +18,10 @@ namespace Input
     inline std::atomic<bool> bMouseRight = false;
     inline std::atomic<bool> bMouseMiddle = false;
 
+    // Last VK code pressed via WH_KEYBOARD_LL (0 = none pending).
+    // Widgets consume this with exchange(0) so it is one-shot.
+    inline std::atomic<int> nLastVK = 0;
+
     void Start();
     void Stop();
 }
