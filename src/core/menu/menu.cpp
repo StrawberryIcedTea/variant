@@ -210,38 +210,8 @@ void Menu::Render()
     if (!bOpenLocal)
         return;
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    ImGui::SetNextWindowPos({io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f}, ImGuiCond_Once, {0.5f, 0.5f});
-    ImGui::SetNextWindowSize({560.f, 440.f}, ImGuiCond_Always);
-
-    // Title bar is TitleBg (bright); push TitleText so "variant" reads against it
-    ImGui::PushStyleColor(ImGuiCol_Text, Theme::TitleText);
-    ImGui::Begin("variant", &bOpenLocal,
-                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
-                     ImGuiWindowFlags_NoCollapse);
-    ImGui::PopStyleColor();
-
-    // Outer container — fills window body, provides the inner border
-    ImGui::BeginChild("menu", ImVec2(), true, ImGuiWindowFlags_None);
-
-    ImGui::Columns(2, nullptr, false);
-    ImGui::SetColumnWidth(0, 100.f);
-
-    // ----- Left sidebar -----
-    // Square buttons, no frame/bg — active tab text turns accent colour
-    const float flBtnSize = ImGui::GetColumnWidth(0) - style.FramePadding.x * 2.f - style.WindowPadding.x * 2.f - 1.f;
-
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.f);
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
-
-    ImGui::BeginChild("menu.sidebar", ImVec2(), true, ImGuiWindowFlags_NoScrollbar);
-
-    // "VARIANT" logo above the tabs
-    if (Render::pFontInterExtraBold)
+    ImGui::SetNextWindowSize(ImVec2(360, 300), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("variant", &bOpenLocal))
     {
         ImGui::PushFont(Render::pFontInterExtraBold);
         const float textW = ImGui::CalcTextSize("VARIANT").x;
@@ -252,7 +222,55 @@ void Menu::Render()
         ImGui::Dummy(ImVec2(0.f, 12.f));
     }
 
-    const ImVec4 colAccent = Theme::Accent;
+        if (ImGui::CollapsingHeader("Visuals"))
+        {
+            ImGui::Checkbox("ESP", &Vars.bESP);
+            ImGui::Separator();
+
+            ImGui::Checkbox("Chams", &Vars.bChams);
+            if (Vars.bChams)
+            {
+                static const char* matNames[] = {"Flat", "Glow"};
+
+                ImGui::Combo("Material##chams", &Vars.nChamsMaterial, matNames, IM_ARRAYSIZE(matNames));
+                ImGui::Checkbox("XQZ (through-wall)##chams", &Vars.bChamsXQZ);
+                ImGui::Checkbox("Double Chams##chams", &Vars.bChamsDouble);
+                if (Vars.bChamsDouble)
+                    ImGui::Combo("Material 2##chams", &Vars.nChamsMaterial2, matNames, IM_ARRAYSIZE(matNames));
+
+                ImGui::Checkbox("Enemies##chams", &Vars.bChamsEnemies);
+                ImGui::SameLine();
+                ImGui::Checkbox("Teammates##chams", &Vars.bChamsTeammates);
+                ImGui::SameLine();
+                ImGui::Checkbox("Self##chams", &Vars.bChamsSelf);
+
+                ImGui::Spacing();
+                if (Vars.bChamsDouble)
+                {
+                    // Unique IDs per pass so ImGui doesn't alias the two color rows
+                    ImGui::TextDisabled("Pass 1");
+                    ImGui::ColorEdit4("Enemy##c1", Vars.flChamsEnemyColor, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Team##c1", Vars.flChamsTeamColor, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Self##c1", Vars.flChamsSelfColor, ImGuiColorEditFlags_NoInputs);
+                    ImGui::TextDisabled("Pass 2");
+                    ImGui::ColorEdit4("Enemy##c2", Vars.flChamsEnemyColor2, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Team##c2", Vars.flChamsTeamColor2, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Self##c2", Vars.flChamsSelfColor2, ImGuiColorEditFlags_NoInputs);
+                }
+                else
+                {
+                    ImGui::ColorEdit4("Enemy##c1", Vars.flChamsEnemyColor, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Team##c1", Vars.flChamsTeamColor, ImGuiColorEditFlags_NoInputs);
+                    ImGui::SameLine();
+                    ImGui::ColorEdit4("Self##c1", Vars.flChamsSelfColor, ImGuiColorEditFlags_NoInputs);
+                }
+            }
+        }
 
     if (Render::pFontIcons)
         ImGui::PushFont(Render::pFontIcons);
